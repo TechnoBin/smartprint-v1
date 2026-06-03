@@ -2,6 +2,14 @@
 <html>
 <head>
   <title>SmartPrint V1</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 0 20px; }
+    button { padding: 8px 16px; cursor: pointer; }
+    #status { margin-top: 16px; font-weight: bold; padding: 10px; border-radius: 4px; display: none; }
+    #status.error { background: #fee2e2; color: #b91c1c; display: block; }
+    #status.success { background: #dcfce7; color: #15803d; display: block; }
+    #status.info { background: #dbeafe; color: #1d4ed8; display: block; }
+  </style>
 </head>
 <body>
 
@@ -15,65 +23,77 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = "https://hommwwdjqzkcoxheerxl.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
+
+function setStatus(msg, type) {
+  const el = document.getElementById("status");
+  el.innerText = msg;
+  el.className = type;
+}
 
 async function uploadFile() {
   const file = document.getElementById("fileInput").files[0];
-  const status = document.getElementById("status");
 
   if (!file) {
-    status.innerText = "❌ Please select a PDF file";
+    setStatus("❌ Please select a PDF file first.", "error");
     return;
   }
+
+  if (!window.supabase) {
+    setStatus("❌ Supabase failed to load. Check your internet connection and refresh the page.", "error");
+    return;
+  }
+
+  let client;
+  try {
+    client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } catch (err) {
+    setStatus("❌ Could not connect to database: " + err.message, "error");
+    return;
+  }
+
+  setStatus("⏳ Uploading... please wait", "info");
 
   try {
     const fileName = Date.now() + "_" + file.name;
 
-    status.innerText = "⏳ Uploading... please wait";
-
     // 1. Upload to Supabase Storage
-    const { data, error: uploadError } = await supabase.storage
+    const { data, error: uploadError } = await client.storage
       .from("print-files")
       .upload(fileName, file);
 
     if (uploadError) {
-      console.log(uploadError);
-      status.innerText = "❌ Upload failed: " + uploadError.message;
+      setStatus("❌ Upload failed: " + uploadError.message, "error");
+      console.error("Upload error:", uploadError);
       return;
     }
 
     // 2. Get public URL
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = client.storage
       .from("print-files")
       .getPublicUrl(fileName);
 
     const fileUrl = urlData.publicUrl;
 
     // 3. Save to database
-    const { error: dbError } = await supabase
+    const { error: dbError } = await client
       .from("print_jobs")
-      .insert([
-        {
-          file_name: file.name,
-          file_url: fileUrl
-        }
-      ]);
+      .insert([{ file_name: file.name, file_url: fileUrl }]);
 
     if (dbError) {
-      console.log(dbError);
-      status.innerText = "❌ Database error: " + dbError.message;
+      setStatus("❌ Database error: " + dbError.message, "error");
+      console.error("DB error:", dbError);
       return;
     }
 
-    status.innerText = "✅ Upload successful!";
+    setStatus("✅ Upload successful!", "success");
+    document.getElementById("fileInput").value = "";
   } catch (err) {
-    console.log(err);
-    status.innerText = "❌ Unexpected error: " + err.message;
+    setStatus("❌ Unexpected error: " + err.message, "error");
+    console.error("Unexpected error:", err);
   }
 }
-
 </script>
 
 </body>
