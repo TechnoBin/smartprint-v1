@@ -24,39 +24,56 @@ async function uploadFile() {
   const status = document.getElementById("status");
 
   if (!file) {
-    status.innerText = "Select a PDF first";
+    status.innerText = "❌ Please select a PDF file";
     return;
   }
 
-  const fileName = Date.now() + "_" + file.name;
+  try {
+    const fileName = Date.now() + "_" + file.name;
 
-  status.innerText = "Uploading...";
+    status.innerText = "⏳ Uploading... please wait";
 
-  // Upload file
-  const { error } = await supabase.storage
-    .from("print-files")
-    .upload(fileName, file);
+    // 1. Upload to Supabase Storage
+    const { data, error: uploadError } = await supabase.storage
+      .from("print-files")
+      .upload(fileName, file);
 
-  if (error) {
-    status.innerText = "Upload failed";
-    return;
-  }
-
-  // Get URL
-  const { data } = supabase.storage
-    .from("print-files")
-    .getPublicUrl(fileName);
-
-  // Save to DB
-  await supabase.from("print_jobs").insert([
-    {
-      file_name: file.name,
-      file_url: data.publicUrl
+    if (uploadError) {
+      console.log(uploadError);
+      status.innerText = "❌ Upload failed: " + uploadError.message;
+      return;
     }
-  ]);
 
-  status.innerText = "Upload successful ✅";
+    // 2. Get public URL
+    const { data: urlData } = supabase.storage
+      .from("print-files")
+      .getPublicUrl(fileName);
+
+    const fileUrl = urlData.publicUrl;
+
+    // 3. Save to database
+    const { error: dbError } = await supabase
+      .from("print_jobs")
+      .insert([
+        {
+          file_name: file.name,
+          file_url: fileUrl
+        }
+      ]);
+
+    if (dbError) {
+      console.log(dbError);
+      status.innerText = "❌ Database error: " + dbError.message;
+      return;
+    }
+
+    status.innerText = "✅ Upload successful!";
+  } catch (err) {
+    console.log(err);
+    status.innerText = "❌ Unexpected error: " + err.message;
+  }
 }
+
 </script>
 
 </body>
