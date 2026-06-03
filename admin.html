@@ -2,42 +2,77 @@
 <html>
 <head>
   <title>SmartPrint Dashboard</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+    h2 { margin-bottom: 20px; }
+    .job { border: 1px solid #ccc; padding: 12px; margin: 10px 0; border-radius: 6px; }
+    .job p { margin: 0 0 8px 0; font-weight: bold; }
+    .job a, .job button { margin-right: 8px; padding: 6px 12px; cursor: pointer; }
+    #status { color: #888; font-style: italic; margin-top: 20px; }
+    .error { color: #b91c1c; background: #fee2e2; padding: 10px; border-radius: 4px; }
+  </style>
 </head>
 <body>
 
 <h2>Print Dashboard</h2>
-
+<p id="status">⏳ Loading jobs...</p>
 <div id="jobs"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = "https://hommwwdjqzkcoxheerxl.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
+
+let client;
+
+try {
+  client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (err) {
+  document.getElementById("status").innerHTML = '<span class="error">❌ Could not connect to database. Refresh the page.</span>';
+}
 
 async function loadJobs() {
-  const { data } = await supabase
+  if (!client) return;
+
+  const statusEl = document.getElementById("status");
+  const container = document.getElementById("jobs");
+
+  const { data, error } = await client
     .from("print_jobs")
     .select("*")
     .order("created_at", { ascending: false });
 
-  const container = document.getElementById("jobs");
+  if (error) {
+    statusEl.innerHTML = '<span class="error">❌ Error loading jobs: ' + error.message + '</span>';
+    console.error("Load error:", error);
+    return;
+  }
+
   container.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    statusEl.innerText = "📭 No print jobs yet. Upload a PDF to get started.";
+    return;
+  }
+
+  statusEl.innerText = "✅ " + data.length + " job(s) found — refreshes every 5 seconds";
 
   data.forEach(job => {
     container.innerHTML += `
-      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-        <p><b>${job.file_name}</b></p>
+      <div class="job">
+        <p>${job.file_name}</p>
         <a href="${job.file_url}" target="_blank">Open PDF</a>
-        <button onclick="window.open('${job.file_url}')">Print</button>
+        <button onclick="window.open('${job.file_url}')">🖨️ Print</button>
       </div>
     `;
   });
 }
 
-loadJobs();
-setInterval(loadJobs, 5000);
+if (client) {
+  loadJobs();
+  setInterval(loadJobs, 5000);
+}
 </script>
 
 </body>
