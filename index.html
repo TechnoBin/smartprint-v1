@@ -3,25 +3,167 @@
 <head>
   <title>SmartPrint V1</title>
   <style>
-    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 0 20px; }
-    button { padding: 8px 16px; cursor: pointer; }
-    #status { margin-top: 16px; font-weight: bold; padding: 10px; border-radius: 4px; display: none; }
-    #status.error { background: #fee2e2; color: #b91c1c; display: block; }
-    #status.success { background: #dcfce7; color: #15803d; display: block; }
-    #status.info { background: #dbeafe; color: #1d4ed8; display: block; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .logo {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 22px;
+      color: #1e293b;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 32px;
+    }
+
+    .upload-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #f8fafc;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .upload-area:hover {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+
+    .upload-area.has-file {
+      border-color: #22c55e;
+      background: #f0fdf4;
+    }
+
+    .upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon { font-size: 40px; margin-bottom: 10px; }
+
+    .upload-text {
+      font-size: 15px;
+      color: #475569;
+      font-weight: 500;
+    }
+
+    .upload-hint {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    #file-name {
+      font-size: 13px;
+      color: #22c55e;
+      font-weight: 600;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .btn-upload {
+      width: 100%;
+      padding: 13px;
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-upload:hover { background: #2563eb; }
+    .btn-upload:disabled { background: #93c5fd; cursor: not-allowed; }
+
+    #status {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      display: none;
+    }
+
+    #status.info { display: block; background: #dbeafe; color: #1d4ed8; }
+    #status.success { display: block; background: #dcfce7; color: #15803d; }
+    #status.error { display: block; background: #fee2e2; color: #b91c1c; }
+
+    .footer-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .footer-link a {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer-link a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
-<h2>SmartPrint - Upload PDF</h2>
+<div class="card">
+  <div class="logo">🖨️</div>
+  <h2>SmartPrint</h2>
+  <p class="subtitle">Upload a PDF and send it to the print queue instantly.</p>
 
-<input type="file" id="fileInput" accept="application/pdf" />
-<button onclick="uploadFile()">Upload</button>
+  <div class="upload-area" id="uploadArea">
+    <input type="file" id="fileInput" accept="application/pdf" onchange="onFileSelect()" />
+    <div class="upload-icon">📄</div>
+    <div class="upload-text">Click to choose a PDF</div>
+    <div class="upload-hint">Only PDF files are supported</div>
+    <div id="file-name"></div>
+  </div>
 
-<p id="status"></p>
+  <button class="btn-upload" onclick="uploadFile()" id="uploadBtn">Upload &amp; Print</button>
+
+  <div id="status"></div>
+
+  <div class="footer-link">
+    <a href="/admin.html">View Print Dashboard →</a>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
@@ -32,8 +174,23 @@ function setStatus(msg, type) {
   el.className = type;
 }
 
+function onFileSelect() {
+  const file = document.getElementById("fileInput").files[0];
+  const nameEl = document.getElementById("file-name");
+  const area = document.getElementById("uploadArea");
+  if (file) {
+    nameEl.innerText = "✔ " + file.name;
+    nameEl.style.display = "block";
+    area.classList.add("has-file");
+  } else {
+    nameEl.style.display = "none";
+    area.classList.remove("has-file");
+  }
+}
+
 async function uploadFile() {
   const file = document.getElementById("fileInput").files[0];
+  const btn = document.getElementById("uploadBtn");
 
   if (!file) {
     setStatus("❌ Please select a PDF file first.", "error");
@@ -41,7 +198,7 @@ async function uploadFile() {
   }
 
   if (!window.supabase) {
-    setStatus("❌ Supabase failed to load. Check your internet connection and refresh the page.", "error");
+    setStatus("❌ Supabase failed to load. Please refresh the page.", "error");
     return;
   }
 
@@ -53,46 +210,45 @@ async function uploadFile() {
     return;
   }
 
+  btn.disabled = true;
   setStatus("⏳ Uploading... please wait", "info");
 
   try {
     const fileName = Date.now() + "_" + file.name;
 
-    // 1. Upload to Supabase Storage
     const { data, error: uploadError } = await client.storage
       .from("print-files")
       .upload(fileName, file);
 
     if (uploadError) {
       setStatus("❌ Upload failed: " + uploadError.message, "error");
-      console.error("Upload error:", uploadError);
+      btn.disabled = false;
       return;
     }
 
-    // 2. Get public URL
     const { data: urlData } = client.storage
       .from("print-files")
       .getPublicUrl(fileName);
 
-    const fileUrl = urlData.publicUrl;
-
-    // 3. Save to database
     const { error: dbError } = await client
       .from("print_jobs")
-      .insert([{ file_name: file.name, file_url: fileUrl }]);
+      .insert([{ file_name: file.name, file_url: urlData.publicUrl }]);
 
     if (dbError) {
       setStatus("❌ Database error: " + dbError.message, "error");
-      console.error("DB error:", dbError);
+      btn.disabled = false;
       return;
     }
 
-    setStatus("✅ Upload successful!", "success");
+    setStatus("✅ Uploaded successfully! Check the dashboard to print.", "success");
     document.getElementById("fileInput").value = "";
+    document.getElementById("file-name").style.display = "none";
+    document.getElementById("uploadArea").classList.remove("has-file");
   } catch (err) {
     setStatus("❌ Unexpected error: " + err.message, "error");
-    console.error("Unexpected error:", err);
   }
+
+  btn.disabled = false;
 }
 </script>
 
