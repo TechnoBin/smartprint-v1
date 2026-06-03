@@ -3,33 +3,181 @@
 <head>
   <title>SmartPrint Dashboard</title>
   <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
-    h2 { margin-bottom: 20px; }
-    .job { border: 1px solid #ccc; padding: 12px; margin: 10px 0; border-radius: 6px; }
-    .job p { margin: 0 0 8px 0; font-weight: bold; }
-    .job a, .job button { margin-right: 8px; padding: 6px 12px; cursor: pointer; }
-    #status { color: #888; font-style: italic; margin-top: 20px; }
-    .error { color: #b91c1c; background: #fee2e2; padding: 10px; border-radius: 4px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    header {
+      max-width: 700px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h2 {
+      font-size: 22px;
+      color: #1e293b;
+    }
+
+    header span {
+      font-size: 13px;
+      color: #64748b;
+      background: #e2e8f0;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    #status {
+      max-width: 700px;
+      margin: 0 auto 16px;
+      font-size: 14px;
+      color: #64748b;
+      padding: 10px 14px;
+      background: #fff;
+      border-radius: 8px;
+      border-left: 4px solid #94a3b8;
+    }
+
+    #status.error {
+      color: #b91c1c;
+      border-left-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    #status.success {
+      color: #15803d;
+      border-left-color: #22c55e;
+      background: #f0fdf4;
+    }
+
+    #jobs {
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .job {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .job-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .job-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .job-name {
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 300px;
+    }
+
+    .job-time {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .job-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-outline {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-outline:hover { background: #e2e8f0; }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: #2563eb; }
+
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+      background: #fff;
+      border-radius: 10px;
+    }
+
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty p { font-size: 15px; }
   </style>
 </head>
 <body>
 
-<h2>Print Dashboard</h2>
-<p id="status">⏳ Loading jobs...</p>
+<header>
+  <h2>🖨️ Print Dashboard</h2>
+  <span id="count">Loading...</span>
+</header>
+
+<div id="status">⏳ Connecting to database...</div>
 <div id="jobs"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
 
 let client;
-
 try {
   client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 } catch (err) {
-  document.getElementById("status").innerHTML = '<span class="error">❌ Could not connect to database. Refresh the page.</span>';
+  document.getElementById("status").className = "error";
+  document.getElementById("status").innerText = "❌ Could not connect. Refresh the page.";
+}
+
+function timeAgo(dateStr) {
+  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (diff < 60) return diff + "s ago";
+  if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+  if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+  return Math.floor(diff / 86400) + "d ago";
 }
 
 async function loadJobs() {
@@ -37,6 +185,7 @@ async function loadJobs() {
 
   const statusEl = document.getElementById("status");
   const container = document.getElementById("jobs");
+  const countEl = document.getElementById("count");
 
   const { data, error } = await client
     .from("print_jobs")
@@ -44,29 +193,43 @@ async function loadJobs() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    statusEl.innerHTML = '<span class="error">❌ Error loading jobs: ' + error.message + '</span>';
-    console.error("Load error:", error);
+    statusEl.className = "error";
+    statusEl.innerText = "❌ Error: " + error.message;
+    countEl.innerText = "Error";
     return;
   }
 
-  container.innerHTML = "";
+  countEl.innerText = (data ? data.length : 0) + " job(s)";
 
   if (!data || data.length === 0) {
+    statusEl.className = "";
     statusEl.innerText = "📭 No print jobs yet. Upload a PDF to get started.";
+    container.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📄</div>
+        <p>No jobs found. Upload a PDF from the main page.</p>
+      </div>`;
     return;
   }
 
-  statusEl.innerText = "✅ " + data.length + " job(s) found — refreshes every 5 seconds";
+  statusEl.className = "success";
+  statusEl.innerText = "✅ Live — refreshes every 5 seconds";
 
-  data.forEach(job => {
-    container.innerHTML += `
-      <div class="job">
-        <p>${job.file_name}</p>
-        <a href="${job.file_url}" target="_blank">Open PDF</a>
-        <button onclick="window.open('${job.file_url}')">🖨️ Print</button>
+  container.innerHTML = data.map(job => `
+    <div class="job">
+      <div class="job-info">
+        <div class="job-icon">📄</div>
+        <div>
+          <div class="job-name">${job.file_name}</div>
+          <div class="job-time">${job.created_at ? timeAgo(job.created_at) : ''}</div>
+        </div>
       </div>
-    `;
-  });
+      <div class="job-actions">
+        <a class="btn btn-outline" href="${job.file_url}" target="_blank">👁️ View</a>
+        <button class="btn btn-primary" onclick="window.open('${job.file_url}')">🖨️ Print</button>
+      </div>
+    </div>
+  `).join("");
 }
 
 if (client) {
