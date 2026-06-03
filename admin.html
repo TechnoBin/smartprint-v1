@@ -153,6 +153,15 @@
 
 <header>
   <h2>🖨️ Print Dashboard</h2>
+  <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+
+  <button onclick="setFilter('all')" class="btn btn-outline">All</button>
+  <button onclick="setFilter('pending')" class="btn btn-outline">Pending</button>
+  <button onclick="setFilter('printed')" class="btn btn-outline">Printed</button>
+  <button onclick="setFilter('bw')" class="btn btn-outline">B/W</button>
+  <button onclick="setFilter('color')" class="btn btn-outline">Color</button>
+
+  </div>
   <span id="count">Loading...</span>
 </header>
 
@@ -165,6 +174,7 @@ const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
 
 let client;
+  let currentFilter = "all";
 try {
   client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 } catch (err) {
@@ -187,10 +197,28 @@ async function loadJobs() {
   const container = document.getElementById("jobs");
   const countEl = document.getElementById("count");
 
-  const { data, error } = await client
+  let query = client
     .from("print_jobs")
     .select("*")
     .order("created_at", { ascending: false });
+
+  if (currentFilter === "pending") {
+    query = query.eq("status", "pending");
+  }
+
+  if (currentFilter === "printed") {
+    query = query.eq("status", "printed");
+  }
+
+  if (currentFilter === "bw") {
+    query = query.eq("print_type", "bw");
+  }
+
+  if (currentFilter === "color") {
+    query = query.eq("print_type", "color");
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     statusEl.className = "error";
@@ -213,29 +241,81 @@ async function loadJobs() {
   }
 
   statusEl.className = "success";
-  statusEl.innerText = "✅ Live — refreshes every 5 seconds";
+  statusEl.innerText = "🟢 Live Print Queue (Auto-updating)";
 
-  container.innerHTML = data.map(job => `
+  container.innerHTML = (data || []).map(job => `
     <div class="job">
       <div class="job-info">
         <div class="job-icon">📄</div>
         <div>
           <div class="job-name">${job.file_name}</div>
+          <div style="
+  font-size:12px;
+  margin-top:4px;
+  font-weight:600;
+  color:${job.status === 'printed' ? '#16a34a' : '#f59e0b'};
+">
+  ${job.status === 'printed' ? '✔ Printed' : '⏳ Pending'}
+</div>
+          <div style="font-size:12px; margin-top:4px; color:#64748b;">
+  Status: <b>${job.status || 'pending'}</b>
+</div>
           <div class="job-time">${job.created_at ? timeAgo(job.created_at) : ''}</div>
         </div>
       </div>
       <div class="job-actions">
-        <a class="btn btn-outline" href="${job.file_url}" target="_blank">👁️ View</a>
-        <button class="btn btn-primary" onclick="window.open('${job.file_url}')">🖨️ Print</button>
-      </div>
+  <a class="btn btn-outline" href="${job.file_url}" target="_blank">👁️ View</a>
+
+  <button class="btn btn-primary" onclick="openPrint('${job.file_url}')">
+  🖨️ Print
+</button>
+
+  <!-- ➕ ADD THIS NEW BUTTON -->
+  <button class="btn btn-outline" onclick="markPrinted('${job.id}')">
+    ✔ Done
+  </button>
+</div>
     </div>
   `).join("");
 }
 
 if (client) {
   loadJobs();
-  setInterval(loadJobs, 5000);
+  setInterval(() => {
+    loadJobs();
+  }, 4000);
 }
+  async function markPrinted(id) {
+  const { error } = await client
+    .from("print_jobs")
+    .update({ status: "printed" })
+    .eq("id", id);
+
+  if (error) {
+    alert("Error: " + error.message);
+    return;
+  }
+
+  loadJobs(); // refresh dashboard
+  }
+  function setFilter(type) {
+  currentFilter = type;
+  loadJobs();
+  }
+  function openPrint(url) {
+  const win = window.open(url);
+
+  if (!win) {
+    alert("Popup blocked! Please allow popups for printing.");
+    return;
+  }
+
+  win.onload = () => {
+    setTimeout(() => {
+      win.print();
+    }, 500);
+  };
+  }
 </script>
 
 </body>
