@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SmartPrint V1</title>
+</head>
+<body>
+
+<h2>SmartPrint - Upload PDF</h2>
+
+<input type="file" id="fileInput" accept="application/pdf" />
+<button onclick="uploadFile()">Upload</button>
+
+<p id="status"></p>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+const supabaseUrl = "YOUR_SUPABASE_URL";
+const supabaseKey = "YOUR_SUPABASE_ANON_KEY";
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function uploadFile() {
+  const file = document.getElementById("fileInput").files[0];
+  const status = document.getElementById("status");
+
+  if (!file) {
+    status.innerText = "Select a PDF first";
+    return;
+  }
+
+  const fileName = Date.now() + "_" + file.name;
+
+  status.innerText = "Uploading...";
+
+  // Upload file
+  const { error } = await supabase.storage
+    .from("print-files")
+    .upload(fileName, file);
+
+  if (error) {
+    status.innerText = "Upload failed";
+    return;
+  }
+
+  // Get URL
+  const { data } = supabase.storage
+    .from("print-files")
+    .getPublicUrl(fileName);
+
+  // Save to DB
+  await supabase.from("print_jobs").insert([
+    {
+      file_name: file.name,
+      file_url: data.publicUrl
+    }
+  ]);
+
+  status.innerText = "Upload successful ✅";
+}
+</script>
+
+</body>
+</html>
