@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SmartPrint Dashboard</title>
+</head>
+<body>
+
+<h2>Print Dashboard</h2>
+
+<div id="jobs"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+const supabaseUrl = "https://hommwwdjqzkcoxheerxl.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function loadJobs() {
+  const { data } = await supabase
+    .from("print_jobs")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  const container = document.getElementById("jobs");
+  container.innerHTML = "";
+
+  data.forEach(job => {
+    container.innerHTML += `
+      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+        <p><b>${job.file_name}</b></p>
+        <a href="${job.file_url}" target="_blank">Open PDF</a>
+        <button onclick="window.open('${job.file_url}')">Print</button>
+      </div>
+    `;
+  });
+}
+
+loadJobs();
+setInterval(loadJobs, 5000);
+</script>
+
+</body>
+</html>
