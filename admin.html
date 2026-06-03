@@ -9,12 +9,12 @@
 
 <div id="jobs"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 const supabaseUrl = "https://hommwwdjqzkcoxheerxl.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 async function loadJobs() {
   const { data } = await supabase
