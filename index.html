@@ -154,6 +154,15 @@
     <div id="file-name"></div>
   </div>
 
+  <div style="margin:15px 0;">
+  <label><b>Print Type:</b></label><br>
+
+  <input type="radio" name="type" value="bw" checked onchange="printType='bw'"> Black & White
+  <input type="radio" name="type" value="color" onchange="printType='color'"> Color
+</div>
+
+<div id="page-info" style="margin:10px 0; font-weight:600;"></div>
+<div id="price-info" style="margin:10px 0; font-weight:700; color:#16a34a;"></div>
   <button class="btn-upload" onclick="uploadFile()" id="uploadBtn">Upload &amp; Print</button>
 
   <div id="status"></div>
@@ -163,10 +172,18 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
+let pageCount = 0;
+let printType = "bw";
+
+let totalPrice = 0;
+
+const BW_PRICE = 2;
+const COLOR_PRICE = 5;
 
 function setStatus(msg, type) {
   const el = document.getElementById("status");
@@ -191,6 +208,23 @@ function onFileSelect() {
 async function uploadFile() {
   const file = document.getElementById("fileInput").files[0];
   const btn = document.getElementById("uploadBtn");
+  const pageInfo = document.getElementById("page-info");
+
+  if (!file) {
+    setStatus("❌ Please select a PDF file first.", "error");
+    return;
+  }
+
+  btn.disabled = true;
+
+  setStatus("📄 Reading PDF pages...", "info");
+
+  pageCount = await getPageCount(file);
+  pageInfo.innerText = "📄 Pages: " + pageCount;
+  totalPrice = calculatePrice(pageCount, printType);
+
+document.getElementById("price-info").innerText =
+  "💰 Estimated Price: ₹" + totalPrice;
 
   if (!file) {
     setStatus("❌ Please select a PDF file first.", "error");
@@ -231,8 +265,14 @@ async function uploadFile() {
       .getPublicUrl(fileName);
 
     const { error: dbError } = await client
-      .from("print_jobs")
-      .insert([{ file_name: file.name, file_url: urlData.publicUrl }]);
+    .from("print_jobs")
+      .insert([{
+        file_name: file.name,
+        file_url: urlData.publicUrl,
+        pages: pageCount,
+        print_type: printType,
+        price: totalPrice
+      }]);
 
     if (dbError) {
       setStatus("❌ Database error: " + dbError.message, "error");
@@ -250,6 +290,18 @@ async function uploadFile() {
 
   btn.disabled = false;
 }
+  async function getPageCount(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  return pdf.numPages;
+  }
+  function calculatePrice(pages, type) {
+  if (type === "color") {
+    return pages * COLOR_PRICE;
+  } else {
+    return pages * BW_PRICE;
+  }
+  }
 </script>
 
 </body>
