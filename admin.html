@@ -5,150 +5,113 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; min-height: 100vh; padding: 30px 20px; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; min-height: 100vh; padding: 28px 20px; }
 
     header {
-      max-width: 720px;
-      margin: 0 auto 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
+      max-width: 760px; margin: 0 auto 20px;
+      display: flex; align-items: center;
+      justify-content: space-between; flex-wrap: wrap; gap: 10px;
     }
 
     .header-left h2 { font-size: 22px; font-weight: 700; color: #1e293b; }
     .header-left p  { font-size: 13px; color: #94a3b8; margin-top: 2px; }
 
-    .badge {
-      background: #e2e8f0;
-      color: #475569;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 5px 14px;
-      border-radius: 20px;
+    .count-badge {
+      background: #1e293b; color: #fff;
+      font-size: 13px; font-weight: 600;
+      padding: 5px 14px; border-radius: 20px;
     }
 
     .filters {
-      max-width: 720px;
-      margin: 0 auto 20px;
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      max-width: 760px; margin: 0 auto 18px;
+      display: flex; gap: 8px; flex-wrap: wrap;
     }
 
     .filter-btn {
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      border: 1px solid #cbd5e1;
-      background: #fff;
-      color: #64748b;
-      transition: all 0.15s;
+      padding: 6px 16px; border-radius: 20px;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; border: 1.5px solid #e2e8f0;
+      background: #fff; color: #64748b; transition: all 0.15s;
     }
 
     .filter-btn:hover { background: #f1f5f9; }
     .filter-btn.active { background: #1e293b; color: #fff; border-color: #1e293b; }
 
-    #jobs { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+    #jobs { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
     .job {
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
+      background: #fff; border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 16px;
+      border-left: 4px solid #e2e8f0;
       transition: opacity 0.3s;
     }
 
-    .job.is-printed { opacity: 0.6; }
+    .job.is-pending { border-left-color: #f59e0b; }
+    .job.is-printed { border-left-color: #22c55e; opacity: 0.65; }
 
-    .job-left { display: flex; align-items: center; gap: 14px; overflow: hidden; }
+    .job-left { display: flex; align-items: center; gap: 14px; overflow: hidden; flex: 1; }
 
     .job-icon {
-      width: 42px; height: 42px;
-      border-radius: 10px;
-      background: #eff6ff;
+      width: 44px; height: 44px; border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      flex-shrink: 0;
+      font-size: 22px; flex-shrink: 0;
+      background: #eff6ff;
     }
 
     .job.is-printed .job-icon { background: #f0fdf4; }
 
-    .job-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1e293b;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 260px;
+    .job-details { overflow: hidden; }
+
+    .job-customer {
+      font-size: 15px; font-weight: 700; color: #1e293b;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
-    .job-meta { display: flex; align-items: center; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
-
-    .meta-tag {
-      font-size: 11px;
-      font-weight: 500;
-      padding: 2px 8px;
-      border-radius: 10px;
-      background: #f1f5f9;
-      color: #64748b;
+    .job-filename {
+      font-size: 12px; color: #64748b; margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 320px;
     }
 
-    .status-tag {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 10px;
+    .job-tags { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+
+    .tag {
+      font-size: 11px; font-weight: 600;
+      padding: 2px 9px; border-radius: 10px;
     }
 
-    .status-pending  { background: #fff7ed; color: #c2410c; }
-    .status-printed  { background: #f0fdf4; color: #15803d; }
+    .tag-pending  { background: #fff7ed; color: #c2410c; }
+    .tag-printed  { background: #f0fdf4; color: #15803d; }
+    .tag-info     { background: #f1f5f9; color: #475569; }
+    .tag-time     { background: #f8fafc; color: #94a3b8; font-weight: 500; }
 
     .job-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
     .btn {
-      padding: 7px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      text-decoration: none;
-      transition: all 0.15s;
+      padding: 8px 16px; border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; text-decoration: none;
+      transition: all 0.15s; display: inline-flex;
+      align-items: center; gap: 5px;
     }
 
-    .btn-view   { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+    .btn-view  { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
     .btn-view:hover { background: #e2e8f0; }
-    .btn-print  { background: #3b82f6; color: #fff; }
+    .btn-print { background: #3b82f6; color: #fff; }
     .btn-print:hover { background: #2563eb; }
-    .btn-done   { background: #22c55e; color: #fff; }
+    .btn-done  { background: #22c55e; color: #fff; }
     .btn-done:hover { background: #16a34a; }
 
     .empty {
-      text-align: center;
-      padding: 60px 20px;
-      background: #fff;
-      border-radius: 12px;
-      color: #94a3b8;
+      text-align: center; padding: 60px 20px;
+      background: #fff; border-radius: 14px; color: #94a3b8;
     }
 
-    .empty div { font-size: 40px; margin-bottom: 10px; }
-    .empty p   { font-size: 15px; }
-
-    #loader {
-      text-align: center;
-      color: #94a3b8;
-      font-size: 14px;
-      padding: 40px;
-    }
+    .empty div { font-size: 42px; margin-bottom: 12px; }
+    .empty p { font-size: 15px; }
   </style>
 </head>
 <body>
@@ -156,20 +119,20 @@
 <header>
   <div class="header-left">
     <h2>🖨️ Print Dashboard</h2>
-    <p>Live queue — auto refreshes every 5 seconds</p>
+    <p>Auto-refreshes every 5 seconds</p>
   </div>
-  <span class="badge" id="count">Loading...</span>
+  <span class="count-badge" id="count">Loading...</span>
 </header>
 
 <div class="filters">
   <button class="filter-btn active" id="filter-all"     onclick="setFilter('all')">All</button>
-  <button class="filter-btn"        id="filter-pending" onclick="setFilter('pending')">Pending</button>
-  <button class="filter-btn"        id="filter-printed" onclick="setFilter('printed')">Printed</button>
+  <button class="filter-btn"        id="filter-pending" onclick="setFilter('pending')">⏳ Pending</button>
+  <button class="filter-btn"        id="filter-printed" onclick="setFilter('printed')">✅ Printed</button>
   <button class="filter-btn"        id="filter-bw"      onclick="setFilter('bw')">B&amp;W</button>
   <button class="filter-btn"        id="filter-color"   onclick="setFilter('color')">Color</button>
 </div>
 
-<div id="jobs"><div id="loader">Loading jobs...</div></div>
+<div id="jobs"><p style="text-align:center;padding:40px;color:#94a3b8;">Loading jobs...</p></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -182,20 +145,11 @@ let currentFilter = "all";
 function formatTime(d) {
   const date = new Date(d);
   const now = new Date();
-  const diffMs = now - date;
-  const diffMins = Math.floor(diffMs / 60000);
-
-  let ago;
-  if (diffMins < 1)       ago = "just now";
-  else if (diffMins < 60) ago = diffMins + "m ago";
-  else if (diffMins < 1440) ago = Math.floor(diffMins / 60) + "h ago";
-  else                    ago = Math.floor(diffMins / 1440) + "d ago";
-
+  const mins = Math.floor((now - date) / 60000);
+  let ago = mins < 1 ? "just now" : mins < 60 ? mins + "m ago" : mins < 1440 ? Math.floor(mins/60) + "h ago" : Math.floor(mins/1440) + "d ago";
   const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   const dateStr = date.toLocaleDateString([], { day: "numeric", month: "short" });
-  const today = now.toDateString() === date.toDateString();
-
-  return (today ? timeStr : dateStr + ", " + timeStr) + " (" + ago + ")";
+  return (now.toDateString() === date.toDateString() ? timeStr : dateStr + " " + timeStr) + " · " + ago;
 }
 
 function setFilter(type) {
@@ -205,22 +159,11 @@ function setFilter(type) {
   loadJobs();
 }
 
-  async function markDone(id) {
-    alert("Done clicked: " + id);
-
-    const { error } = await client
-      .from("print_jobs")
-      .update({ status: "printed" })
-      .eq("id", id);
-
-    if (error) {
-      alert("Database Error:\n" + error.message);
-      return;
-    }
-
-    alert("Update Success");
-    loadJobs();
-  }
+async function markDone(id) {
+  const { error } = await client.from("print_jobs").update({ status: "printed" }).eq("id", id);
+  if (error) { alert("Error: " + error.message); return; }
+  loadJobs();
+}
 
 function printJob(url) {
   const win = window.open(url);
@@ -239,7 +182,7 @@ async function loadJobs() {
   const container = document.getElementById("jobs");
 
   if (error) {
-    container.innerHTML = '<div class="empty"><div>⚠️</div><p>Error: ' + error.message + '</p></div>';
+    container.innerHTML = '<div class="empty"><div>⚠️</div><p>' + error.message + '</p></div>';
     return;
   }
 
@@ -253,30 +196,27 @@ async function loadJobs() {
   container.innerHTML = data.map(job => {
     const done = job.status === "printed";
     const type = job.print_type === "color" ? "Color" : "B&W";
-    const meta = [
-      job.created_at ? formatTime(job.created_at) : "",
-      job.pages ? job.pages + " pages" : "",
-      type,
-      job.price ? "Rs." + job.price : ""
-    ].filter(Boolean).join(" · ");
+    const customer = job.customer_name || "Unknown";
 
-    return '<div class="job' + (done ? " is-printed" : "") + '">' +
+    return '<div class="job ' + (done ? "is-printed" : "is-pending") + '">' +
       '<div class="job-left">' +
         '<div class="job-icon">' + (done ? "✅" : "📄") + '</div>' +
-        '<div>' +
-          '<div class="job-name">' + job.file_name + '</div>' +
-          '<div class="job-meta">' +
-            '<span class="status-tag ' + (done ? "status-printed" : "status-pending") + '">' +
-              (done ? "Printed" : "Pending") +
-            '</span>' +
-            '<span class="meta-tag">' + meta + '</span>' +
+        '<div class="job-details">' +
+          '<div class="job-customer">👤 ' + customer + '</div>' +
+          '<div class="job-filename">📎 ' + job.file_name + '</div>' +
+          '<div class="job-tags">' +
+            '<span class="tag ' + (done ? "tag-printed" : "tag-pending") + '">' + (done ? "✅ Printed" : "⏳ Pending") + '</span>' +
+            (job.pages    ? '<span class="tag tag-info">' + job.pages + ' pages</span>' : '') +
+            '<span class="tag tag-info">' + type + '</span>' +
+            (job.price    ? '<span class="tag tag-info">Rs.' + job.price + '</span>' : '') +
+            (job.created_at ? '<span class="tag tag-time">' + formatTime(job.created_at) + '</span>' : '') +
           '</div>' +
         '</div>' +
       '</div>' +
       '<div class="job-actions">' +
         '<a class="btn btn-view" href="' + job.file_url + '" target="_blank">View</a>' +
-        '<button class="btn btn-print" onclick="printJob(\'' + job.file_url + '\')">Print</button>' +
-        (!done ? '<button class="btn btn-done" onclick="markDone(\'' + job.id + '\')">Done</button>' : '') +
+        '<button class="btn btn-print" onclick="printJob(\'' + job.file_url + '\')">🖨️ Print</button>' +
+        (!done ? '<button class="btn btn-done" onclick="markDone(\'' + job.id + '\')">✔ Done</button>' : '') +
       '</div>' +
     '</div>';
   }).join("");

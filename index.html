@@ -28,11 +28,43 @@
     .brand-icon { font-size: 26px; }
     .brand-name { font-size: 20px; font-weight: 700; color: #1e293b; }
 
+    .section-label {
+      font-size: 12px; font-weight: 600;
+      color: #64748b; text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+
+    /* Customer name input */
+    .input-wrap { position: relative; margin-bottom: 20px; }
+
+    .input-wrap input {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #1e293b;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .input-wrap input:focus { border-color: #3b82f6; }
+    .input-wrap input.filled { border-color: #22c55e; }
+
+    .input-icon {
+      position: absolute;
+      left: 13px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      pointer-events: none;
+    }
+
     /* Upload area */
     .upload-area {
       border: 2px dashed #cbd5e1;
       border-radius: 12px;
-      padding: 32px 20px;
+      padding: 28px 20px;
       text-align: center;
       cursor: pointer;
       background: #f8fafc;
@@ -42,8 +74,8 @@
     }
 
     .upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
-    .upload-area.has-file { border-color: #22c55e; background: #f0fdf4; }
     .upload-area.loading { border-color: #f59e0b; background: #fffbeb; }
+    .upload-area.has-file { border-color: #22c55e; background: #f0fdf4; }
 
     .upload-area input[type="file"] {
       position: absolute; inset: 0;
@@ -51,20 +83,11 @@
       width: 100%; height: 100%;
     }
 
-    .upload-icon { font-size: 36px; margin-bottom: 8px; }
+    .upload-icon { font-size: 34px; margin-bottom: 8px; }
     .upload-text { font-size: 14px; font-weight: 600; color: #475569; }
     .upload-hint { font-size: 12px; color: #94a3b8; margin-top: 4px; }
 
-    #file-name {
-      font-size: 13px; font-weight: 600;
-      color: #16a34a; margin-top: 10px;
-      display: none;
-      word-break: break-all;
-    }
-
     /* Print type toggle */
-    .section-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-
     .type-toggle { display: flex; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
     .type-toggle input[type="radio"] { display: none; }
     .type-toggle label {
@@ -74,18 +97,18 @@
       color: #64748b; cursor: pointer;
       background: #f8fafc;
       transition: all 0.15s;
-      line-height: 1.4;
+      line-height: 1.5;
     }
-
     .type-toggle input[type="radio"]:checked + label { background: #1e293b; color: #fff; }
 
-    /* Summary box */
+    /* Summary */
     #summary {
       background: #f8fafc;
       border-radius: 10px;
       padding: 14px 16px;
       margin-bottom: 20px;
       display: none;
+      border: 1px solid #e2e8f0;
     }
 
     .summary-row {
@@ -109,9 +132,9 @@
       border-top: 1px solid #e2e8f0;
     }
 
-    .summary-total span:last-child { color: #16a34a; }
+    .summary-total span:last-child { color: #16a34a; font-size: 17px; }
 
-    /* Upload button */
+    /* Button */
     .btn-upload {
       width: 100%; padding: 13px;
       background: #3b82f6; color: #fff;
@@ -121,9 +144,8 @@
     }
 
     .btn-upload:hover:not(:disabled) { background: #2563eb; }
-    .btn-upload:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
+    .btn-upload:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
 
-    /* Status */
     #status {
       margin-top: 14px; padding: 12px 16px;
       border-radius: 8px; font-size: 14px;
@@ -147,12 +169,18 @@
     <div class="brand-name">SmartPrint</div>
   </div>
 
+  <div class="section-label">Customer Name</div>
+  <div class="input-wrap">
+    <span class="input-icon">👤</span>
+    <input type="text" id="customerName" placeholder="Enter customer name" oninput="checkReady()" />
+  </div>
+
+  <div class="section-label">Upload PDF</div>
   <div class="upload-area" id="uploadArea">
     <input type="file" id="fileInput" accept="application/pdf" onchange="onFileSelect()" />
     <div class="upload-icon" id="uploadIcon">📄</div>
     <div class="upload-text" id="uploadText">Click to choose a PDF</div>
     <div class="upload-hint" id="uploadHint">Only PDF files are supported</div>
-    <div id="file-name"></div>
   </div>
 
   <div class="section-label">Print Type</div>
@@ -164,6 +192,7 @@
   </div>
 
   <div id="summary">
+    <div class="summary-row"><span>Customer</span><span id="s-customer">—</span></div>
     <div class="summary-row"><span>File</span><span id="s-file">—</span></div>
     <div class="summary-row"><span>Pages</span><span id="s-pages">—</span></div>
     <div class="summary-row"><span>Print Type</span><span id="s-type">—</span></div>
@@ -194,6 +223,7 @@ const COLOR_PRICE = 5;
 let selectedFile = null;
 let pageCount = 0;
 let printType = "bw";
+let readingPDF = false;
 
 function setStatus(msg, type) {
   const el = document.getElementById("status");
@@ -201,20 +231,31 @@ function setStatus(msg, type) {
   el.className = type;
 }
 
+function checkReady() {
+  const name = document.getElementById("customerName").value.trim();
+  const nameInput = document.getElementById("customerName");
+  nameInput.className = name.length > 0 ? "filled" : "";
+  const ready = name.length > 0 && selectedFile !== null && pageCount > 0 && !readingPDF;
+  document.getElementById("uploadBtn").disabled = !ready;
+  if (ready) updateSummary();
+}
+
 function updateSummary() {
-  if (!selectedFile || pageCount === 0) return;
+  const name = document.getElementById("customerName").value.trim();
+  if (!selectedFile || pageCount === 0 || !name) return;
+
   const pricePerPage = printType === "color" ? COLOR_PRICE : BW_PRICE;
   const total = pageCount * pricePerPage;
   const sizeKB = Math.round(selectedFile.size / 1024);
   const sizeStr = sizeKB > 1024 ? (sizeKB/1024).toFixed(1) + " MB" : sizeKB + " KB";
 
+  document.getElementById("s-customer").innerText = name;
   document.getElementById("s-file").innerText = selectedFile.name + " (" + sizeStr + ")";
   document.getElementById("s-pages").innerText = pageCount;
   document.getElementById("s-type").innerText = printType === "color" ? "Color" : "Black & White";
   document.getElementById("s-ppp").innerText = "Rs." + pricePerPage;
   document.getElementById("s-total").innerText = "Rs." + total;
   document.getElementById("summary").style.display = "block";
-  document.getElementById("uploadBtn").disabled = false;
 }
 
 function onTypeChange() {
@@ -224,45 +265,48 @@ function onTypeChange() {
 
 async function onFileSelect() {
   selectedFile = document.getElementById("fileInput").files[0];
-  const area = document.getElementById("uploadArea");
-  const nameEl = document.getElementById("file-name");
-  const btn = document.getElementById("uploadBtn");
+  pageCount = 0;
+  readingPDF = false;
 
   if (!selectedFile) {
-    area.className = "upload-area";
-    nameEl.style.display = "none";
+    document.getElementById("uploadArea").className = "upload-area";
+    document.getElementById("uploadIcon").innerText = "📄";
+    document.getElementById("uploadText").innerText = "Click to choose a PDF";
+    document.getElementById("uploadHint").innerText = "Only PDF files are supported";
     document.getElementById("summary").style.display = "none";
-    btn.disabled = true;
+    checkReady();
     return;
   }
 
-  area.className = "upload-area loading";
+  readingPDF = true;
+  document.getElementById("uploadArea").className = "upload-area loading";
   document.getElementById("uploadIcon").innerText = "⏳";
   document.getElementById("uploadText").innerText = "Reading PDF...";
   document.getElementById("uploadHint").innerText = "Calculating pages & cost";
-  nameEl.style.display = "none";
-  btn.disabled = true;
+  document.getElementById("summary").style.display = "none";
+  checkReady();
 
   try {
     const arrayBuffer = await selectedFile.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     pageCount = pdf.numPages;
   } catch (e) {
-    pageCount = 0;
+    pageCount = 1;
   }
 
-  area.className = "upload-area has-file";
+  readingPDF = false;
+  document.getElementById("uploadArea").className = "upload-area has-file";
   document.getElementById("uploadIcon").innerText = "✅";
   document.getElementById("uploadText").innerText = selectedFile.name;
   document.getElementById("uploadHint").innerText = pageCount + " page" + (pageCount !== 1 ? "s" : "") + " detected";
-  nameEl.style.display = "none";
 
-  updateSummary();
+  checkReady();
 }
 
 async function uploadFile() {
   const btn = document.getElementById("uploadBtn");
-  if (!selectedFile) return;
+  const customerName = document.getElementById("customerName").value.trim();
+  if (!selectedFile || !customerName) return;
 
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const pricePerPage = printType === "color" ? COLOR_PRICE : BW_PRICE;
@@ -286,6 +330,7 @@ async function uploadFile() {
     const { data: urlData } = client.storage.from("print-files").getPublicUrl(fileName);
 
     const { error: dbError } = await client.from("print_jobs").insert([{
+      customer_name: customerName,
       file_name: selectedFile.name,
       file_url: urlData.publicUrl,
       pages: pageCount,
@@ -304,6 +349,8 @@ async function uploadFile() {
 
     setTimeout(() => {
       selectedFile = null; pageCount = 0;
+      document.getElementById("customerName").value = "";
+      document.getElementById("customerName").className = "";
       document.getElementById("fileInput").value = "";
       document.getElementById("uploadArea").className = "upload-area";
       document.getElementById("uploadIcon").innerText = "📄";
