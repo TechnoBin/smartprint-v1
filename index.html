@@ -20,178 +20,80 @@
       border-radius: 16px;
       padding: 36px;
       width: 100%;
-      max-width: 460px;
+      max-width: 440px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.09);
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 24px;
-    }
+    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+    .brand-icon { font-size: 26px; }
+    .brand-name { font-size: 20px; font-weight: 700; color: #1e293b; }
 
-    .brand-icon { font-size: 28px; }
-
-    .brand-name {
-      font-size: 20px;
-      font-weight: 700;
-      color: #1e293b;
-    }
-
-    /* Step indicator */
-    .steps {
-      display: flex;
-      align-items: center;
-      margin-bottom: 28px;
-    }
-
-    .step {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #94a3b8;
-    }
-
-    .step.active { color: #3b82f6; }
-    .step.done { color: #22c55e; }
-
-    .step-num {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      background: #e2e8f0;
-      color: #94a3b8;
-    }
-
-    .step.active .step-num { background: #3b82f6; color: #fff; }
-    .step.done .step-num { background: #22c55e; color: #fff; }
-
-    .step-line {
-      flex: 1;
-      height: 2px;
-      background: #e2e8f0;
-      margin: 0 8px;
-    }
-
-    .step-line.done { background: #22c55e; }
-
-    /* Step 1 */
-    #step1 { display: block; }
-    #step2 { display: none; }
-
+    /* Upload area */
     .upload-area {
       border: 2px dashed #cbd5e1;
       border-radius: 12px;
-      padding: 40px 20px;
+      padding: 32px 20px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s;
       background: #f8fafc;
-      margin-bottom: 16px;
       position: relative;
+      transition: all 0.2s;
+      margin-bottom: 20px;
     }
 
     .upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
     .upload-area.has-file { border-color: #22c55e; background: #f0fdf4; }
+    .upload-area.loading { border-color: #f59e0b; background: #fffbeb; }
 
     .upload-area input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
     }
 
-    .upload-icon { font-size: 38px; margin-bottom: 10px; }
-    .upload-text { font-size: 15px; color: #475569; font-weight: 500; }
+    .upload-icon { font-size: 36px; margin-bottom: 8px; }
+    .upload-text { font-size: 14px; font-weight: 600; color: #475569; }
     .upload-hint { font-size: 12px; color: #94a3b8; margin-top: 4px; }
 
     #file-name {
-      font-size: 13px;
-      color: #22c55e;
-      font-weight: 600;
-      margin-top: 10px;
+      font-size: 13px; font-weight: 600;
+      color: #16a34a; margin-top: 10px;
       display: none;
-    }
-
-    /* Print type toggle */
-    .type-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #475569;
-      margin-bottom: 8px;
-    }
-
-    .type-toggle {
-      display: flex;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-
-    .type-toggle input[type="radio"] { display: none; }
-
-    .type-toggle label {
-      flex: 1;
-      text-align: center;
-      padding: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #64748b;
-      cursor: pointer;
-      transition: all 0.15s;
-      background: #f8fafc;
-    }
-
-    .type-toggle input[type="radio"]:checked + label {
-      background: #3b82f6;
-      color: #fff;
-    }
-
-    /* Step 2 — summary */
-    .summary-box {
-      background: #f8fafc;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .summary-file {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid #e2e8f0;
-      margin-bottom: 14px;
-    }
-
-    .summary-file-icon { font-size: 28px; }
-
-    .summary-file-name {
-      font-weight: 600;
-      color: #1e293b;
-      font-size: 15px;
       word-break: break-all;
     }
 
-    .summary-file-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+    /* Print type toggle */
+    .section-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+
+    .type-toggle { display: flex; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+    .type-toggle input[type="radio"] { display: none; }
+    .type-toggle label {
+      flex: 1; text-align: center;
+      padding: 10px 8px;
+      font-size: 13px; font-weight: 500;
+      color: #64748b; cursor: pointer;
+      background: #f8fafc;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+
+    .type-toggle input[type="radio"]:checked + label { background: #1e293b; color: #fff; }
+
+    /* Summary box */
+    #summary {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      display: none;
+    }
 
     .summary-row {
       display: flex;
       justify-content: space-between;
-      font-size: 14px;
-      color: #475569;
-      margin-bottom: 8px;
+      font-size: 13px;
+      color: #64748b;
+      padding: 4px 0;
     }
 
     .summary-row span:last-child { font-weight: 600; color: #1e293b; }
@@ -199,136 +101,85 @@
     .summary-total {
       display: flex;
       justify-content: space-between;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       color: #1e293b;
-      padding-top: 12px;
+      padding-top: 10px;
+      margin-top: 6px;
       border-top: 1px solid #e2e8f0;
-      margin-top: 4px;
     }
 
     .summary-total span:last-child { color: #16a34a; }
 
-    .btn {
-      width: 100%;
-      padding: 13px;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
+    /* Upload button */
+    .btn-upload {
+      width: 100%; padding: 13px;
+      background: #3b82f6; color: #fff;
+      border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
     }
 
-    .btn-primary { background: #3b82f6; color: #fff; }
-    .btn-primary:hover { background: #2563eb; }
-    .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
-    .btn-outline-back {
-      width: auto;
-      background: none;
-      border: none;
-      color: #64748b;
-      font-size: 13px;
-      cursor: pointer;
-      padding: 0;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .btn-outline-back:hover { color: #1e293b; }
+    .btn-upload:hover:not(:disabled) { background: #2563eb; }
+    .btn-upload:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
 
+    /* Status */
     #status {
-      margin-top: 14px;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      display: none;
+      margin-top: 14px; padding: 12px 16px;
+      border-radius: 8px; font-size: 14px;
+      font-weight: 500; display: none;
     }
 
     #status.info    { display: block; background: #dbeafe; color: #1d4ed8; }
     #status.success { display: block; background: #dcfce7; color: #15803d; }
     #status.error   { display: block; background: #fee2e2; color: #b91c1c; }
 
-    .footer-link {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 13px;
-      color: #94a3b8;
-    }
-
-    .footer-link a {
-      color: #3b82f6;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
+    .footer-link { text-align: center; margin-top: 20px; font-size: 13px; color: #94a3b8; }
+    .footer-link a { color: #3b82f6; text-decoration: none; font-weight: 500; }
     .footer-link a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
 <div class="card">
-
   <div class="brand">
     <div class="brand-icon">🖨️</div>
     <div class="brand-name">SmartPrint</div>
   </div>
 
-  <!-- Step indicator -->
-  <div class="steps">
-    <div class="step active" id="indicator-step1">
-      <div class="step-num">1</div>
-      <span>Select File</span>
-    </div>
-    <div class="step-line" id="line1"></div>
-    <div class="step" id="indicator-step2">
-      <div class="step-num">2</div>
-      <span>Review &amp; Upload</span>
-    </div>
+  <div class="upload-area" id="uploadArea">
+    <input type="file" id="fileInput" accept="application/pdf" onchange="onFileSelect()" />
+    <div class="upload-icon" id="uploadIcon">📄</div>
+    <div class="upload-text" id="uploadText">Click to choose a PDF</div>
+    <div class="upload-hint" id="uploadHint">Only PDF files are supported</div>
+    <div id="file-name"></div>
   </div>
 
-  <!-- STEP 1: File selection -->
-  <div id="step1">
-    <div class="upload-area" id="uploadArea">
-      <input type="file" id="fileInput" accept="application/pdf" onchange="onFileSelect()" />
-      <div class="upload-icon">📄</div>
-      <div class="upload-text">Click to choose a PDF</div>
-      <div class="upload-hint">Only PDF files are supported</div>
-      <div id="file-name"></div>
-    </div>
-
-    <div class="type-label">Print Type</div>
-    <div class="type-toggle">
-      <input type="radio" name="type" id="bw" value="bw" checked onchange="printType='bw'">
-      <label for="bw">⬛ Black &amp; White — Rs.2/page</label>
-      <input type="radio" name="type" id="color" value="color" onchange="printType='color'">
-      <label for="color">🎨 Color — Rs.5/page</label>
-    </div>
-
-    <button class="btn btn-primary" id="proceedBtn" onclick="proceed()" disabled>
-      Proceed →
-    </button>
+  <div class="section-label">Print Type</div>
+  <div class="type-toggle">
+    <input type="radio" name="type" id="bw" value="bw" checked onchange="onTypeChange()">
+    <label for="bw">⬛ Black &amp; White<br><small>Rs.2 / page</small></label>
+    <input type="radio" name="type" id="color" value="color" onchange="onTypeChange()">
+    <label for="color">🎨 Color<br><small>Rs.5 / page</small></label>
   </div>
 
-  <!-- STEP 2: Review & Upload -->
-  <div id="step2">
-    <button class="btn-outline-back" onclick="goBack()">← Back</button>
-
-    <div class="summary-box" id="summaryBox"></div>
-
-    <button class="btn btn-primary" id="uploadBtn" onclick="uploadFile()">
-      Confirm &amp; Upload
-    </button>
-
-    <div id="status"></div>
+  <div id="summary">
+    <div class="summary-row"><span>File</span><span id="s-file">—</span></div>
+    <div class="summary-row"><span>Pages</span><span id="s-pages">—</span></div>
+    <div class="summary-row"><span>Print Type</span><span id="s-type">—</span></div>
+    <div class="summary-row"><span>Price per page</span><span id="s-ppp">—</span></div>
+    <div class="summary-total"><span>Total</span><span id="s-total">Rs.0</span></div>
   </div>
+
+  <button class="btn-upload" id="uploadBtn" onclick="uploadFile()" disabled>
+    Upload &amp; Print
+  </button>
+
+  <div id="status"></div>
 
   <div class="footer-link">
     <a href="/admin.html">View Print Dashboard →</a>
   </div>
-
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
@@ -340,10 +191,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const BW_PRICE = 2;
 const COLOR_PRICE = 5;
 
-let printType = "bw";
-let pageCount = 0;
-let totalPrice = 0;
 let selectedFile = null;
+let pageCount = 0;
+let printType = "bw";
 
 function setStatus(msg, type) {
   const el = document.getElementById("status");
@@ -351,95 +201,72 @@ function setStatus(msg, type) {
   el.className = type;
 }
 
-function onFileSelect() {
-  selectedFile = document.getElementById("fileInput").files[0];
-  const nameEl = document.getElementById("file-name");
-  const area = document.getElementById("uploadArea");
-  const proceedBtn = document.getElementById("proceedBtn");
+function updateSummary() {
+  if (!selectedFile || pageCount === 0) return;
+  const pricePerPage = printType === "color" ? COLOR_PRICE : BW_PRICE;
+  const total = pageCount * pricePerPage;
+  const sizeKB = Math.round(selectedFile.size / 1024);
+  const sizeStr = sizeKB > 1024 ? (sizeKB/1024).toFixed(1) + " MB" : sizeKB + " KB";
 
-  if (selectedFile) {
-    nameEl.innerText = selectedFile.name;
-    nameEl.style.display = "block";
-    area.classList.add("has-file");
-    proceedBtn.disabled = false;
-  } else {
-    nameEl.style.display = "none";
-    area.classList.remove("has-file");
-    proceedBtn.disabled = true;
-  }
+  document.getElementById("s-file").innerText = selectedFile.name + " (" + sizeStr + ")";
+  document.getElementById("s-pages").innerText = pageCount;
+  document.getElementById("s-type").innerText = printType === "color" ? "Color" : "Black & White";
+  document.getElementById("s-ppp").innerText = "Rs." + pricePerPage;
+  document.getElementById("s-total").innerText = "Rs." + total;
+  document.getElementById("summary").style.display = "block";
+  document.getElementById("uploadBtn").disabled = false;
 }
 
-async function proceed() {
-  if (!selectedFile) return;
+function onTypeChange() {
+  printType = document.querySelector('input[name="type"]:checked').value;
+  if (pageCount > 0) updateSummary();
+}
 
-  const proceedBtn = document.getElementById("proceedBtn");
-  proceedBtn.disabled = true;
-  proceedBtn.innerText = "Reading PDF...";
+async function onFileSelect() {
+  selectedFile = document.getElementById("fileInput").files[0];
+  const area = document.getElementById("uploadArea");
+  const nameEl = document.getElementById("file-name");
+  const btn = document.getElementById("uploadBtn");
+
+  if (!selectedFile) {
+    area.className = "upload-area";
+    nameEl.style.display = "none";
+    document.getElementById("summary").style.display = "none";
+    btn.disabled = true;
+    return;
+  }
+
+  area.className = "upload-area loading";
+  document.getElementById("uploadIcon").innerText = "⏳";
+  document.getElementById("uploadText").innerText = "Reading PDF...";
+  document.getElementById("uploadHint").innerText = "Calculating pages & cost";
+  nameEl.style.display = "none";
+  btn.disabled = true;
 
   try {
     const arrayBuffer = await selectedFile.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     pageCount = pdf.numPages;
-  } catch (err) {
+  } catch (e) {
     pageCount = 0;
   }
 
-  const pricePerPage = printType === "color" ? COLOR_PRICE : BW_PRICE;
-  totalPrice = pageCount * pricePerPage;
+  area.className = "upload-area has-file";
+  document.getElementById("uploadIcon").innerText = "✅";
+  document.getElementById("uploadText").innerText = selectedFile.name;
+  document.getElementById("uploadHint").innerText = pageCount + " page" + (pageCount !== 1 ? "s" : "") + " detected";
+  nameEl.style.display = "none";
 
-  const typeLabel = printType === "color" ? "Color" : "Black & White";
-  const fileSizeKB = Math.round(selectedFile.size / 1024);
-  const fileSize = fileSizeKB > 1024 ? (fileSizeKB / 1024).toFixed(1) + " MB" : fileSizeKB + " KB";
-
-  document.getElementById("summaryBox").innerHTML =
-    '<div class="summary-file">' +
-      '<div class="summary-file-icon">📄</div>' +
-      '<div>' +
-        '<div class="summary-file-name">' + selectedFile.name + '</div>' +
-        '<div class="summary-file-sub">' + fileSize + '</div>' +
-      '</div>' +
-    '</div>' +
-    '<div class="summary-row"><span>Pages</span><span>' + (pageCount || "Unknown") + '</span></div>' +
-    '<div class="summary-row"><span>Print Type</span><span>' + typeLabel + '</span></div>' +
-    '<div class="summary-row"><span>Price per page</span><span>Rs.' + pricePerPage + '</span></div>' +
-    '<div class="summary-total"><span>Total Cost</span><span>Rs.' + totalPrice + '</span></div>';
-
-  document.getElementById("step1").style.display = "none";
-  document.getElementById("step2").style.display = "block";
-
-  document.getElementById("indicator-step1").className = "step done";
-  document.getElementById("indicator-step2").className = "step active";
-  document.getElementById("line1").className = "step-line done";
-
-  proceedBtn.disabled = false;
-  proceedBtn.innerText = "Proceed →";
-}
-
-function goBack() {
-  document.getElementById("step1").style.display = "block";
-  document.getElementById("step2").style.display = "none";
-  document.getElementById("status").className = "";
-
-  document.getElementById("indicator-step1").className = "step active";
-  document.getElementById("indicator-step2").className = "step";
-  document.getElementById("line1").className = "step-line";
+  updateSummary();
 }
 
 async function uploadFile() {
   const btn = document.getElementById("uploadBtn");
+  if (!selectedFile) return;
 
-  if (!window.supabase) {
-    setStatus("Supabase failed to load. Please refresh the page.", "error");
-    return;
-  }
-
-  let client;
-  try {
-    client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  } catch (err) {
-    setStatus("Could not connect to database: " + err.message, "error");
-    return;
-  }
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const pricePerPage = printType === "color" ? COLOR_PRICE : BW_PRICE;
+  const total = pageCount * pricePerPage;
 
   btn.disabled = true;
   btn.innerText = "Uploading...";
@@ -449,58 +276,48 @@ async function uploadFile() {
     const fileName = Date.now() + "_" + selectedFile.name;
 
     const { error: uploadError } = await client.storage
-      .from("print-files")
-      .upload(fileName, selectedFile);
+      .from("print-files").upload(fileName, selectedFile);
 
     if (uploadError) {
       setStatus("Upload failed: " + uploadError.message, "error");
-      btn.disabled = false;
-      btn.innerText = "Confirm & Upload";
-      return;
+      btn.disabled = false; btn.innerText = "Upload & Print"; return;
     }
 
-    const { data: urlData } = client.storage
-      .from("print-files")
-      .getPublicUrl(fileName);
+    const { data: urlData } = client.storage.from("print-files").getPublicUrl(fileName);
 
-    const { error: dbError } = await client
-      .from("print_jobs")
-      .insert([{
-        file_name: selectedFile.name,
-        file_url: urlData.publicUrl,
-        pages: pageCount,
-        print_type: printType,
-        price: totalPrice,
-        status: "pending"
-      }]);
+    const { error: dbError } = await client.from("print_jobs").insert([{
+      file_name: selectedFile.name,
+      file_url: urlData.publicUrl,
+      pages: pageCount,
+      print_type: printType,
+      price: total,
+      status: "pending"
+    }]);
 
     if (dbError) {
       setStatus("Database error: " + dbError.message, "error");
-      btn.disabled = false;
-      btn.innerText = "Confirm & Upload";
-      return;
+      btn.disabled = false; btn.innerText = "Upload & Print"; return;
     }
 
     setStatus("Uploaded successfully! Check the dashboard to print.", "success");
     btn.innerText = "Uploaded!";
 
-    setTimeout(function() {
-      selectedFile = null;
-      pageCount = 0;
-      totalPrice = 0;
+    setTimeout(() => {
+      selectedFile = null; pageCount = 0;
       document.getElementById("fileInput").value = "";
-      document.getElementById("file-name").style.display = "none";
-      document.getElementById("uploadArea").classList.remove("has-file");
-      document.getElementById("proceedBtn").disabled = true;
+      document.getElementById("uploadArea").className = "upload-area";
+      document.getElementById("uploadIcon").innerText = "📄";
+      document.getElementById("uploadText").innerText = "Click to choose a PDF";
+      document.getElementById("uploadHint").innerText = "Only PDF files are supported";
+      document.getElementById("summary").style.display = "none";
       document.getElementById("status").className = "";
-      goBack();
-      btn.innerText = "Confirm & Upload";
+      btn.disabled = true;
+      btn.innerText = "Upload & Print";
     }, 2500);
 
   } catch (err) {
     setStatus("Unexpected error: " + err.message, "error");
-    btn.disabled = false;
-    btn.innerText = "Confirm & Upload";
+    btn.disabled = false; btn.innerText = "Upload & Print";
   }
 }
 </script>
