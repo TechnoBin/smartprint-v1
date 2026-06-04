@@ -23,7 +23,7 @@
     }
 
     .filters {
-      max-width: 760px; margin: 0 auto 18px;
+      max-width: 760px; margin: 0 auto 12px;
       display: flex; gap: 8px; flex-wrap: wrap;
     }
 
@@ -37,6 +37,43 @@
     .filter-btn:hover { background: #f1f5f9; }
     .filter-btn.active { background: #1e293b; color: #fff; border-color: #1e293b; }
 
+    /* Selection toolbar */
+    .select-bar {
+      max-width: 760px; margin: 0 auto 14px;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .select-bar-left { display: flex; align-items: center; gap: 10px; }
+
+    .select-all-label {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; font-weight: 600; color: #475569;
+      cursor: pointer; user-select: none;
+    }
+
+    .select-all-label input[type="checkbox"] {
+      width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6;
+    }
+
+    .selected-info {
+      font-size: 13px; color: #94a3b8;
+    }
+
+    .btn-delete-selected {
+      display: none;
+      padding: 7px 18px; border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none;
+      background: #ef4444; color: #fff;
+      transition: background 0.15s;
+      align-items: center; gap: 6px;
+    }
+
+    .btn-delete-selected.visible { display: inline-flex; }
+    .btn-delete-selected:hover { background: #dc2626; }
+
     #jobs { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
     .job {
@@ -44,13 +81,20 @@
       padding: 18px 20px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.07);
       display: flex; align-items: center;
-      justify-content: space-between; gap: 16px;
+      justify-content: space-between; gap: 14px;
       border-left: 4px solid #e2e8f0;
-      transition: opacity 0.3s;
+      transition: opacity 0.3s, box-shadow 0.15s;
     }
 
     .job.is-pending { border-left-color: #f59e0b; }
     .job.is-printed { border-left-color: #22c55e; opacity: 0.65; }
+    .job.is-selected { box-shadow: 0 0 0 2px #3b82f6; opacity: 1 !important; }
+
+    /* Checkbox column */
+    .job-checkbox { flex-shrink: 0; }
+    .job-checkbox input[type="checkbox"] {
+      width: 17px; height: 17px; cursor: pointer; accent-color: #3b82f6;
+    }
 
     .job-left { display: flex; align-items: center; gap: 14px; overflow: hidden; flex: 1; }
 
@@ -73,7 +117,7 @@
     .job-filename {
       font-size: 12px; color: #64748b; margin-top: 2px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      max-width: 320px;
+      max-width: 280px;
     }
 
     .job-tags { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
@@ -88,10 +132,10 @@
     .tag-info     { background: #f1f5f9; color: #475569; }
     .tag-time     { background: #f8fafc; color: #94a3b8; font-weight: 500; }
 
-    .job-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .job-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 
     .btn {
-      padding: 8px 16px; border-radius: 8px;
+      padding: 8px 14px; border-radius: 8px;
       font-size: 13px; font-weight: 600;
       cursor: pointer; border: none; text-decoration: none;
       transition: all 0.15s; display: inline-flex;
@@ -104,6 +148,8 @@
     .btn-print:hover { background: #2563eb; }
     .btn-done  { background: #22c55e; color: #fff; }
     .btn-done:hover { background: #16a34a; }
+    .btn-del   { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .btn-del:hover { background: #fecaca; }
 
     .empty {
       text-align: center; padding: 60px 20px;
@@ -132,6 +178,19 @@
   <button class="filter-btn"        id="filter-color"   onclick="setFilter('color')">Color</button>
 </div>
 
+<div class="select-bar">
+  <div class="select-bar-left">
+    <label class="select-all-label">
+      <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" />
+      Select All
+    </label>
+    <span class="selected-info" id="selectedInfo"></span>
+  </div>
+  <button class="btn-delete-selected" id="btnDeleteSelected" onclick="deleteSelected()">
+    🗑️ Delete Selected
+  </button>
+</div>
+
 <div id="jobs"><p style="text-align:center;padding:40px;color:#94a3b8;">Loading jobs...</p></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -141,6 +200,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentFilter = "all";
+let autoRefreshTimer = null;
 
 function formatTime(d) {
   const date = new Date(d);
@@ -156,12 +216,63 @@ function setFilter(type) {
   currentFilter = type;
   document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
   document.getElementById("filter-" + type).classList.add("active");
+  document.getElementById("selectAll").checked = false;
   loadJobs();
+}
+
+function onCheckboxChange() {
+  const allBoxes = document.querySelectorAll(".job-checkbox-input");
+  const checkedBoxes = document.querySelectorAll(".job-checkbox-input:checked");
+  const count = checkedBoxes.length;
+
+  document.getElementById("selectAll").checked = allBoxes.length > 0 && count === allBoxes.length;
+  document.getElementById("selectAll").indeterminate = count > 0 && count < allBoxes.length;
+
+  const info = document.getElementById("selectedInfo");
+  info.innerText = count > 0 ? count + " selected" : "";
+
+  const delBtn = document.getElementById("btnDeleteSelected");
+  if (count > 0) delBtn.classList.add("visible");
+  else delBtn.classList.remove("visible");
+
+  document.querySelectorAll(".job").forEach(card => {
+    const cb = card.querySelector(".job-checkbox-input");
+    if (cb && cb.checked) card.classList.add("is-selected");
+    else card.classList.remove("is-selected");
+  });
+}
+
+function toggleSelectAll() {
+  const checked = document.getElementById("selectAll").checked;
+  document.querySelectorAll(".job-checkbox-input").forEach(cb => cb.checked = checked);
+  onCheckboxChange();
 }
 
 async function markDone(id) {
   const { error } = await client.from("print_jobs").update({ status: "printed" }).eq("id", id);
   if (error) { alert("Error: " + error.message); return; }
+  loadJobs();
+}
+
+async function deleteSingle(id) {
+  if (!confirm("Delete this job?")) return;
+  const { error } = await client.from("print_jobs").delete().eq("id", id);
+  if (error) { alert("Delete failed: " + error.message); return; }
+  loadJobs();
+}
+
+async function deleteSelected() {
+  const checked = document.querySelectorAll(".job-checkbox-input:checked");
+  if (checked.length === 0) return;
+  if (!confirm("Delete " + checked.length + " selected job(s)? This cannot be undone.")) return;
+
+  const ids = Array.from(checked).map(cb => cb.dataset.id);
+  const { error } = await client.from("print_jobs").delete().in("id", ids);
+  if (error) { alert("Delete failed: " + error.message); return; }
+
+  document.getElementById("selectAll").checked = false;
+  document.getElementById("selectedInfo").innerText = "";
+  document.getElementById("btnDeleteSelected").classList.remove("visible");
   loadJobs();
 }
 
@@ -198,7 +309,10 @@ async function loadJobs() {
     const type = job.print_type === "color" ? "Color" : "B&W";
     const customer = job.customer_name || "Unknown";
 
-    return '<div class="job ' + (done ? "is-printed" : "is-pending") + '">' +
+    return '<div class="job ' + (done ? "is-printed" : "is-pending") + '" id="job-' + job.id + '">' +
+      '<div class="job-checkbox">' +
+        '<input type="checkbox" class="job-checkbox-input" data-id="' + job.id + '" onchange="onCheckboxChange()" />' +
+      '</div>' +
       '<div class="job-left">' +
         '<div class="job-icon">' + (done ? "✅" : "📄") + '</div>' +
         '<div class="job-details">' +
@@ -217,9 +331,12 @@ async function loadJobs() {
         '<a class="btn btn-view" href="' + job.file_url + '" target="_blank">View</a>' +
         '<button class="btn btn-print" onclick="printJob(\'' + job.file_url + '\')">🖨️ Print</button>' +
         (!done ? '<button class="btn btn-done" onclick="markDone(\'' + job.id + '\')">✔ Done</button>' : '') +
+        '<button class="btn btn-del" onclick="deleteSingle(\'' + job.id + '\')">🗑️</button>' +
       '</div>' +
     '</div>';
   }).join("");
+
+  onCheckboxChange();
 }
 
 loadJobs();
