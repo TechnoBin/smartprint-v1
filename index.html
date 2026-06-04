@@ -470,7 +470,8 @@ async function uploadFile() {
         file_url: urlData.publicUrl,
         pages: pageCount,
         print_type: printType,
-        price: totalPrice
+        price: totalPrice,
+        status: "pending"
       }]);
 
     if (dbError) {

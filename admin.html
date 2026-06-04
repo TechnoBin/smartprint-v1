@@ -205,14 +205,22 @@ function setFilter(type) {
   loadJobs();
 }
 
-async function markDone(id) {
-  const { error } = await client.from("print_jobs").update({ status: "printed" }).eq("id", id);
-  if (error) {
-    alert("Done failed: " + error.message + "\n\nFix: Add a 'status' column (type: text) to your print_jobs table in Supabase.");
-    return;
+  async function markDone(id) {
+    alert("Done clicked: " + id);
+
+    const { error } = await client
+      .from("print_jobs")
+      .update({ status: "printed" })
+      .eq("id", id);
+
+    if (error) {
+      alert("Database Error:\n" + error.message);
+      return;
+    }
+
+    alert("Update Success");
+    loadJobs();
   }
-  loadJobs();
-}
 
 function printJob(url) {
   const win = window.open(url);
