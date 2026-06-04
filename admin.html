@@ -344,6 +344,10 @@ function printJob(url) {
 
 /* ── Load ── */
 async function loadJobs() {
+  // Remember which jobs are currently selected before re-render
+  const selectedIds = new Set(
+    Array.from(document.querySelectorAll(".job-cb:checked")).map(cb => cb.dataset.id)
+  );
   let q = client.from("print_jobs").select("*").order("created_at", { ascending: false });
   if (currentFilter === "pending") q = q.eq("status", "pending");
   if (currentFilter === "printed") q = q.eq("status", "printed");
@@ -365,7 +369,7 @@ async function loadJobs() {
     return;
   }
 
-  container.innerHTML = data.map(job => {
+  container.innerHTML = data.map((job) => {
     const done     = job.status === "printed";
     const type     = job.print_type === "color" ? "Color" : "B&W";
     const customer = job.customer_name || "Unknown";
@@ -401,6 +405,14 @@ async function loadJobs() {
 
       </div>`;
   }).join("");
+
+  // Restore previously selected checkboxes after re-render
+  if (selectedIds.size > 0) {
+    document.querySelectorAll(".job-cb").forEach(cb => {
+      if (selectedIds.has(cb.dataset.id)) cb.checked = true;
+    });
+    syncFab();
+  }
 }
 
 loadJobs();
