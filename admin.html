@@ -179,12 +179,23 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentFilter = "all";
 
-function timeAgo(d) {
-  const s = Math.floor((Date.now() - new Date(d)) / 1000);
-  if (s < 60) return s + "s ago";
-  if (s < 3600) return Math.floor(s/60) + "m ago";
-  if (s < 86400) return Math.floor(s/3600) + "h ago";
-  return Math.floor(s/86400) + "d ago";
+function formatTime(d) {
+  const date = new Date(d);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+
+  let ago;
+  if (diffMins < 1)       ago = "just now";
+  else if (diffMins < 60) ago = diffMins + "m ago";
+  else if (diffMins < 1440) ago = Math.floor(diffMins / 60) + "h ago";
+  else                    ago = Math.floor(diffMins / 1440) + "d ago";
+
+  const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const dateStr = date.toLocaleDateString([], { day: "numeric", month: "short" });
+  const today = now.toDateString() === date.toDateString();
+
+  return (today ? timeStr : dateStr + ", " + timeStr) + " (" + ago + ")";
 }
 
 function setFilter(type) {
@@ -195,7 +206,11 @@ function setFilter(type) {
 }
 
 async function markDone(id) {
-  await client.from("print_jobs").update({ status: "printed" }).eq("id", id);
+  const { error } = await client.from("print_jobs").update({ status: "printed" }).eq("id", id);
+  if (error) {
+    alert("Done failed: " + error.message + "\n\nFix: Add a 'status' column (type: text) to your print_jobs table in Supabase.");
+    return;
+  }
   loadJobs();
 }
 
@@ -231,7 +246,7 @@ async function loadJobs() {
     const done = job.status === "printed";
     const type = job.print_type === "color" ? "Color" : "B&W";
     const meta = [
-      job.created_at ? timeAgo(job.created_at) : "",
+      job.created_at ? formatTime(job.created_at) : "",
       job.pages ? job.pages + " pages" : "",
       type,
       job.price ? "Rs." + job.price : ""
