@@ -5,16 +5,11 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f1f5f9;
-      min-height: 100vh;
-      padding: 30px 20px;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; min-height: 100vh; padding: 30px 20px; }
 
     header {
-      max-width: 700px;
-      margin: 0 auto 24px;
+      max-width: 720px;
+      margin: 0 auto 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -22,246 +17,250 @@
       gap: 10px;
     }
 
-    header h2 { font-size: 22px; color: #1e293b; }
+    .header-left h2 { font-size: 22px; font-weight: 700; color: #1e293b; }
+    .header-left p  { font-size: 13px; color: #94a3b8; margin-top: 2px; }
 
-    header span {
-      font-size: 13px;
-      color: #64748b;
+    .badge {
       background: #e2e8f0;
-      padding: 4px 12px;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 14px;
       border-radius: 20px;
     }
 
     .filters {
-      max-width: 700px;
-      margin: 0 auto 16px;
+      max-width: 720px;
+      margin: 0 auto 20px;
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
     }
 
-    #status {
-      max-width: 700px;
-      margin: 0 auto 16px;
-      font-size: 14px;
-      color: #64748b;
-      padding: 10px 14px;
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #cbd5e1;
       background: #fff;
-      border-radius: 8px;
-      border-left: 4px solid #94a3b8;
+      color: #64748b;
+      transition: all 0.15s;
     }
 
-    #status.error  { color: #b91c1c; border-left-color: #ef4444; background: #fef2f2; }
-    #status.success { color: #15803d; border-left-color: #22c55e; background: #f0fdf4; }
+    .filter-btn:hover { background: #f1f5f9; }
+    .filter-btn.active { background: #1e293b; color: #fff; border-color: #1e293b; }
 
-    #jobs {
-      max-width: 700px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    #jobs { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
 
     .job {
       background: #fff;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 16px 20px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 16px;
+      transition: opacity 0.3s;
     }
 
-    .job-info { display: flex; align-items: center; gap: 12px; overflow: hidden; }
-    .job-icon { font-size: 28px; flex-shrink: 0; }
+    .job.is-printed { opacity: 0.6; }
+
+    .job-left { display: flex; align-items: center; gap: 14px; overflow: hidden; }
+
+    .job-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: #eff6ff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .job.is-printed .job-icon { background: #f0fdf4; }
 
     .job-name {
+      font-size: 14px;
       font-weight: 600;
       color: #1e293b;
-      font-size: 15px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 280px;
+      max-width: 260px;
     }
 
-    .job-status-badge {
-      font-size: 12px;
-      font-weight: 600;
-      margin-top: 3px;
+    .job-meta { display: flex; align-items: center; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+
+    .meta-tag {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #f1f5f9;
+      color: #64748b;
     }
 
-    .job-time { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+    .status-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .status-pending  { background: #fff7ed; color: #c2410c; }
+    .status-printed  { background: #f0fdf4; color: #15803d; }
+
     .job-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
     .btn {
       padding: 7px 14px;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
       border: none;
       text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+      transition: all 0.15s;
     }
 
-    .btn-outline { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
-    .btn-outline:hover { background: #e2e8f0; }
-    .btn-primary { background: #3b82f6; color: #fff; }
-    .btn-primary:hover { background: #2563eb; }
-    .btn-success { background: #22c55e; color: #fff; }
-    .btn-success:hover { background: #16a34a; }
-    .btn-active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+    .btn-view   { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+    .btn-view:hover { background: #e2e8f0; }
+    .btn-print  { background: #3b82f6; color: #fff; }
+    .btn-print:hover { background: #2563eb; }
+    .btn-done   { background: #22c55e; color: #fff; }
+    .btn-done:hover { background: #16a34a; }
 
-    .empty { text-align: center; padding: 60px 20px; color: #94a3b8; background: #fff; border-radius: 10px; }
-    .empty-icon { font-size: 48px; margin-bottom: 12px; }
-    .empty p { font-size: 15px; }
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      background: #fff;
+      border-radius: 12px;
+      color: #94a3b8;
+    }
+
+    .empty div { font-size: 40px; margin-bottom: 10px; }
+    .empty p   { font-size: 15px; }
+
+    #loader {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 14px;
+      padding: 40px;
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <h2>Print Dashboard</h2>
-  <span id="count">Loading...</span>
+  <div class="header-left">
+    <h2>🖨️ Print Dashboard</h2>
+    <p>Live queue — auto refreshes every 5 seconds</p>
+  </div>
+  <span class="badge" id="count">Loading...</span>
 </header>
 
 <div class="filters">
-  <button onclick="setFilter('all')" class="btn btn-outline" id="filter-all">All</button>
-  <button onclick="setFilter('pending')" class="btn btn-outline" id="filter-pending">Pending</button>
-  <button onclick="setFilter('printed')" class="btn btn-outline" id="filter-printed">Printed</button>
-  <button onclick="setFilter('bw')" class="btn btn-outline" id="filter-bw">B/W</button>
-  <button onclick="setFilter('color')" class="btn btn-outline" id="filter-color">Color</button>
+  <button class="filter-btn active" id="filter-all"     onclick="setFilter('all')">All</button>
+  <button class="filter-btn"        id="filter-pending" onclick="setFilter('pending')">Pending</button>
+  <button class="filter-btn"        id="filter-printed" onclick="setFilter('printed')">Printed</button>
+  <button class="filter-btn"        id="filter-bw"      onclick="setFilter('bw')">B&amp;W</button>
+  <button class="filter-btn"        id="filter-color"   onclick="setFilter('color')">Color</button>
 </div>
 
-<div id="status">Connecting to database...</div>
-<div id="jobs"></div>
+<div id="jobs"><div id="loader">Loading jobs...</div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
 
-let client;
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentFilter = "all";
 
-try {
-  client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-} catch (err) {
-  document.getElementById("status").className = "error";
-  document.getElementById("status").innerText = "Could not connect. Refresh the page.";
-}
-
-function timeAgo(dateStr) {
-  const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-  if (diff < 60) return diff + "s ago";
-  if (diff < 3600) return Math.floor(diff / 60) + "m ago";
-  if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
-  return Math.floor(diff / 86400) + "d ago";
+function timeAgo(d) {
+  const s = Math.floor((Date.now() - new Date(d)) / 1000);
+  if (s < 60) return s + "s ago";
+  if (s < 3600) return Math.floor(s/60) + "m ago";
+  if (s < 86400) return Math.floor(s/3600) + "h ago";
+  return Math.floor(s/86400) + "d ago";
 }
 
 function setFilter(type) {
   currentFilter = type;
-  document.querySelectorAll(".filters .btn").forEach(btn => btn.classList.remove("btn-active"));
-  document.getElementById("filter-" + type).classList.add("btn-active");
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("filter-" + type).classList.add("active");
   loadJobs();
 }
 
-async function markPrinted(id) {
-  const { error } = await client
-    .from("print_jobs")
-    .update({ status: "printed" })
-    .eq("id", id);
-
-  if (error) {
-    alert("Error: " + error.message);
-    return;
-  }
+async function markDone(id) {
+  await client.from("print_jobs").update({ status: "printed" }).eq("id", id);
   loadJobs();
 }
 
-function openPrint(url) {
+function printJob(url) {
   const win = window.open(url);
-  if (!win) {
-    alert("Popup blocked! Please allow popups for printing.");
-    return;
-  }
-  win.onload = function() {
-    setTimeout(function() { win.print(); }, 500);
-  };
+  if (!win) { alert("Please allow popups to print."); return; }
+  win.onload = () => setTimeout(() => win.print(), 600);
 }
 
 async function loadJobs() {
-  if (!client) return;
+  let q = client.from("print_jobs").select("*").order("created_at", { ascending: false });
+  if (currentFilter === "pending") q = q.eq("status", "pending");
+  if (currentFilter === "printed") q = q.eq("status", "printed");
+  if (currentFilter === "bw")      q = q.eq("print_type", "bw");
+  if (currentFilter === "color")   q = q.eq("print_type", "color");
 
-  const statusEl = document.getElementById("status");
+  const { data, error } = await q;
   const container = document.getElementById("jobs");
-  const countEl = document.getElementById("count");
-
-  let query = client
-    .from("print_jobs")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (currentFilter === "pending") query = query.eq("status", "pending");
-  if (currentFilter === "printed") query = query.eq("status", "printed");
-  if (currentFilter === "bw") query = query.eq("print_type", "bw");
-  if (currentFilter === "color") query = query.eq("print_type", "color");
-
-  const { data, error } = await query;
 
   if (error) {
-    statusEl.className = "error";
-    statusEl.innerText = "Error: " + error.message;
-    countEl.innerText = "Error";
+    container.innerHTML = '<div class="empty"><div>⚠️</div><p>Error: ' + error.message + '</p></div>';
     return;
   }
 
-  countEl.innerText = (data ? data.length : 0) + " job(s)";
+  document.getElementById("count").innerText = (data ? data.length : 0) + " job(s)";
 
   if (!data || data.length === 0) {
-    statusEl.className = "";
-    statusEl.innerText = "No print jobs found. Upload a PDF to get started.";
-    container.innerHTML = '<div class="empty"><div class="empty-icon">📄</div><p>No jobs found.</p></div>';
+    container.innerHTML = '<div class="empty"><div>📭</div><p>No jobs found.</p></div>';
     return;
   }
 
-  statusEl.className = "success";
-  statusEl.innerText = "Live — refreshes every 4 seconds";
+  container.innerHTML = data.map(job => {
+    const done = job.status === "printed";
+    const type = job.print_type === "color" ? "Color" : "B&W";
+    const meta = [
+      job.created_at ? timeAgo(job.created_at) : "",
+      job.pages ? job.pages + " pages" : "",
+      type,
+      job.price ? "Rs." + job.price : ""
+    ].filter(Boolean).join(" · ");
 
-  container.innerHTML = data.map(function(job) {
-    const isPrinted = job.status === "printed";
-    const statusColor = isPrinted ? "#16a34a" : "#f59e0b";
-    const statusText = isPrinted ? "Printed" : "Pending";
-    const timeStr = job.created_at ? timeAgo(job.created_at) : "";
-    const pageInfo = job.pages ? " · " + job.pages + " pages" : "";
-    const priceInfo = job.price ? " · Rs." + job.price : "";
-    const typeInfo = job.print_type ? " · " + (job.print_type === "bw" ? "B&W" : "Color") : "";
-
-    return '<div class="job">' +
-      '<div class="job-info">' +
-        '<div class="job-icon">📄</div>' +
+    return '<div class="job' + (done ? " is-printed" : "") + '">' +
+      '<div class="job-left">' +
+        '<div class="job-icon">' + (done ? "✅" : "📄") + '</div>' +
         '<div>' +
           '<div class="job-name">' + job.file_name + '</div>' +
-          '<div class="job-status-badge" style="color:' + statusColor + '">' + statusText + '</div>' +
-          '<div class="job-time">' + timeStr + pageInfo + typeInfo + priceInfo + '</div>' +
+          '<div class="job-meta">' +
+            '<span class="status-tag ' + (done ? "status-printed" : "status-pending") + '">' +
+              (done ? "Printed" : "Pending") +
+            '</span>' +
+            '<span class="meta-tag">' + meta + '</span>' +
+          '</div>' +
         '</div>' +
       '</div>' +
       '<div class="job-actions">' +
-        '<a class="btn btn-outline" href="' + job.file_url + '" target="_blank">View</a>' +
-        '<button class="btn btn-primary" onclick="openPrint(\'' + job.file_url + '\')">Print</button>' +
-        (isPrinted ? '' : '<button class="btn btn-success" onclick="markPrinted(\'' + job.id + '\')">Done</button>') +
+        '<a class="btn btn-view" href="' + job.file_url + '" target="_blank">View</a>' +
+        '<button class="btn btn-print" onclick="printJob(\'' + job.file_url + '\')">Print</button>' +
+        (!done ? '<button class="btn btn-done" onclick="markDone(\'' + job.id + '\')">Done</button>' : '') +
       '</div>' +
     '</div>';
   }).join("");
 }
 
-if (client) {
-  setFilter("all");
-  setInterval(loadJobs, 4000);
-}
+loadJobs();
+setInterval(loadJobs, 5000);
 </script>
 
 </body>
