@@ -18,50 +18,89 @@
     .card {
       background: #fff;
       border-radius: 16px;
-      padding: 40px;
+      padding: 36px;
       width: 100%;
       max-width: 460px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.09);
     }
 
-    .logo {
-      font-size: 36px;
-      margin-bottom: 8px;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
     }
 
-    h2 {
-      font-size: 22px;
+    .brand-icon { font-size: 28px; }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 700;
       color: #1e293b;
-      margin-bottom: 6px;
     }
 
-    .subtitle {
-      font-size: 14px;
-      color: #94a3b8;
-      margin-bottom: 32px;
+    /* Step indicator */
+    .steps {
+      display: flex;
+      align-items: center;
+      margin-bottom: 28px;
     }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    .step.active { color: #3b82f6; }
+    .step.done { color: #22c55e; }
+
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      background: #e2e8f0;
+      color: #94a3b8;
+    }
+
+    .step.active .step-num { background: #3b82f6; color: #fff; }
+    .step.done .step-num { background: #22c55e; color: #fff; }
+
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: #e2e8f0;
+      margin: 0 8px;
+    }
+
+    .step-line.done { background: #22c55e; }
+
+    /* Step 1 */
+    #step1 { display: block; }
+    #step2 { display: none; }
 
     .upload-area {
       border: 2px dashed #cbd5e1;
       border-radius: 12px;
-      padding: 36px 20px;
+      padding: 40px 20px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
       background: #f8fafc;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       position: relative;
     }
 
-    .upload-area:hover {
-      border-color: #3b82f6;
-      background: #eff6ff;
-    }
-
-    .upload-area.has-file {
-      border-color: #22c55e;
-      background: #f0fdf4;
-    }
+    .upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
+    .upload-area.has-file { border-color: #22c55e; background: #f0fdf4; }
 
     .upload-area input[type="file"] {
       position: absolute;
@@ -72,33 +111,107 @@
       height: 100%;
     }
 
-    .upload-icon { font-size: 40px; margin-bottom: 10px; }
-
-    .upload-text {
-      font-size: 15px;
-      color: #475569;
-      font-weight: 500;
-    }
-
-    .upload-hint {
-      font-size: 12px;
-      color: #94a3b8;
-      margin-top: 4px;
-    }
+    .upload-icon { font-size: 38px; margin-bottom: 10px; }
+    .upload-text { font-size: 15px; color: #475569; font-weight: 500; }
+    .upload-hint { font-size: 12px; color: #94a3b8; margin-top: 4px; }
 
     #file-name {
       font-size: 13px;
       color: #22c55e;
       font-weight: 600;
-      margin-top: 8px;
+      margin-top: 10px;
       display: none;
     }
 
-    .btn-upload {
-      width: 100%;
-      padding: 13px;
+    /* Print type toggle */
+    .type-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .type-toggle {
+      display: flex;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .type-toggle input[type="radio"] { display: none; }
+
+    .type-toggle label {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: #f8fafc;
+    }
+
+    .type-toggle input[type="radio"]:checked + label {
       background: #3b82f6;
       color: #fff;
+    }
+
+    /* Step 2 — summary */
+    .summary-box {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .summary-file {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 14px;
+    }
+
+    .summary-file-icon { font-size: 28px; }
+
+    .summary-file-name {
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 15px;
+      word-break: break-all;
+    }
+
+    .summary-file-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .summary-row span:last-child { font-weight: 600; color: #1e293b; }
+
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e293b;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 4px;
+    }
+
+    .summary-total span:last-child { color: #16a34a; }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
       border: none;
       border-radius: 10px;
       font-size: 15px;
@@ -107,11 +220,26 @@
       transition: background 0.2s;
     }
 
-    .btn-upload:hover { background: #2563eb; }
-    .btn-upload:disabled { background: #93c5fd; cursor: not-allowed; }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
+    .btn-outline-back {
+      width: auto;
+      background: none;
+      border: none;
+      color: #64748b;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-outline-back:hover { color: #1e293b; }
 
     #status {
-      margin-top: 16px;
+      margin-top: 14px;
       padding: 12px 16px;
       border-radius: 8px;
       font-size: 14px;
@@ -119,13 +247,13 @@
       display: none;
     }
 
-    #status.info { display: block; background: #dbeafe; color: #1d4ed8; }
+    #status.info    { display: block; background: #dbeafe; color: #1d4ed8; }
     #status.success { display: block; background: #dcfce7; color: #15803d; }
-    #status.error { display: block; background: #fee2e2; color: #b91c1c; }
+    #status.error   { display: block; background: #fee2e2; color: #b91c1c; }
 
     .footer-link {
       text-align: center;
-      margin-top: 24px;
+      margin-top: 20px;
       font-size: 13px;
       color: #94a3b8;
     }
@@ -142,34 +270,65 @@
 <body>
 
 <div class="card">
-  <div class="logo">🖨️</div>
-  <h2>SmartPrint</h2>
-  <p class="subtitle">Upload a PDF and send it to the print queue instantly.</p>
 
-  <div class="upload-area" id="uploadArea">
-    <input type="file" id="fileInput" accept="application/pdf" onchange="onFileSelect()" />
-    <div class="upload-icon">📄</div>
-    <div class="upload-text">Click to choose a PDF</div>
-    <div class="upload-hint">Only PDF files are supported</div>
-    <div id="file-name"></div>
+  <div class="brand">
+    <div class="brand-icon">🖨️</div>
+    <div class="brand-name">SmartPrint</div>
   </div>
 
-  <div style="margin:15px 0;">
-  <label><b>Print Type:</b></label><br>
+  <!-- Step indicator -->
+  <div class="steps">
+    <div class="step active" id="indicator-step1">
+      <div class="step-num">1</div>
+      <span>Select File</span>
+    </div>
+    <div class="step-line" id="line1"></div>
+    <div class="step" id="indicator-step2">
+      <div class="step-num">2</div>
+      <span>Review &amp; Upload</span>
+    </div>
+  </div>
 
-  <input type="radio" name="type" value="bw" checked onchange="printType='bw'"> Black & White
-  <input type="radio" name="type" value="color" onchange="printType='color'"> Color
-</div>
+  <!-- STEP 1: File selection -->
+  <div id="step1">
+    <div class="upload-area" id="uploadArea">
+      <input type="file" id="fileInput" accept="application/pdf" onchange="onFileSelect()" />
+      <div class="upload-icon">📄</div>
+      <div class="upload-text">Click to choose a PDF</div>
+      <div class="upload-hint">Only PDF files are supported</div>
+      <div id="file-name"></div>
+    </div>
 
-<div id="page-info" style="margin:10px 0; font-weight:600;"></div>
-<div id="price-info" style="margin:10px 0; font-weight:700; color:#16a34a;"></div>
-  <button class="btn-upload" onclick="uploadFile()" id="uploadBtn">Upload &amp; Print</button>
+    <div class="type-label">Print Type</div>
+    <div class="type-toggle">
+      <input type="radio" name="type" id="bw" value="bw" checked onchange="printType='bw'">
+      <label for="bw">⬛ Black &amp; White — Rs.2/page</label>
+      <input type="radio" name="type" id="color" value="color" onchange="printType='color'">
+      <label for="color">🎨 Color — Rs.5/page</label>
+    </div>
 
-  <div id="status"></div>
+    <button class="btn btn-primary" id="proceedBtn" onclick="proceed()" disabled>
+      Proceed →
+    </button>
+  </div>
+
+  <!-- STEP 2: Review & Upload -->
+  <div id="step2">
+    <button class="btn-outline-back" onclick="goBack()">← Back</button>
+
+    <div class="summary-box" id="summaryBox"></div>
+
+    <button class="btn btn-primary" id="uploadBtn" onclick="uploadFile()">
+      Confirm &amp; Upload
+    </button>
+
+    <div id="status"></div>
+  </div>
 
   <div class="footer-link">
     <a href="/admin.html">View Print Dashboard →</a>
   </div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
@@ -177,13 +336,14 @@
 <script>
 const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NzQ4NTIsImV4cCI6MjA5NjA1MDg1Mn0.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
-let pageCount = 0;
-let printType = "bw";
-
-let totalPrice = 0;
 
 const BW_PRICE = 2;
 const COLOR_PRICE = 5;
+
+let printType = "bw";
+let pageCount = 0;
+let totalPrice = 0;
+let selectedFile = null;
 
 function setStatus(msg, type) {
   const el = document.getElementById("status");
@@ -192,47 +352,84 @@ function setStatus(msg, type) {
 }
 
 function onFileSelect() {
-  const file = document.getElementById("fileInput").files[0];
+  selectedFile = document.getElementById("fileInput").files[0];
   const nameEl = document.getElementById("file-name");
   const area = document.getElementById("uploadArea");
-  if (file) {
-    nameEl.innerText = "✔ " + file.name;
+  const proceedBtn = document.getElementById("proceedBtn");
+
+  if (selectedFile) {
+    nameEl.innerText = selectedFile.name;
     nameEl.style.display = "block";
     area.classList.add("has-file");
+    proceedBtn.disabled = false;
   } else {
     nameEl.style.display = "none";
     area.classList.remove("has-file");
+    proceedBtn.disabled = true;
   }
 }
 
+async function proceed() {
+  if (!selectedFile) return;
+
+  const proceedBtn = document.getElementById("proceedBtn");
+  proceedBtn.disabled = true;
+  proceedBtn.innerText = "Reading PDF...";
+
+  try {
+    const arrayBuffer = await selectedFile.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    pageCount = pdf.numPages;
+  } catch (err) {
+    pageCount = 0;
+  }
+
+  const pricePerPage = printType === "color" ? COLOR_PRICE : BW_PRICE;
+  totalPrice = pageCount * pricePerPage;
+
+  const typeLabel = printType === "color" ? "Color" : "Black & White";
+  const fileSizeKB = Math.round(selectedFile.size / 1024);
+  const fileSize = fileSizeKB > 1024 ? (fileSizeKB / 1024).toFixed(1) + " MB" : fileSizeKB + " KB";
+
+  document.getElementById("summaryBox").innerHTML =
+    '<div class="summary-file">' +
+      '<div class="summary-file-icon">📄</div>' +
+      '<div>' +
+        '<div class="summary-file-name">' + selectedFile.name + '</div>' +
+        '<div class="summary-file-sub">' + fileSize + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="summary-row"><span>Pages</span><span>' + (pageCount || "Unknown") + '</span></div>' +
+    '<div class="summary-row"><span>Print Type</span><span>' + typeLabel + '</span></div>' +
+    '<div class="summary-row"><span>Price per page</span><span>Rs.' + pricePerPage + '</span></div>' +
+    '<div class="summary-total"><span>Total Cost</span><span>Rs.' + totalPrice + '</span></div>';
+
+  document.getElementById("step1").style.display = "none";
+  document.getElementById("step2").style.display = "block";
+
+  document.getElementById("indicator-step1").className = "step done";
+  document.getElementById("indicator-step2").className = "step active";
+  document.getElementById("line1").className = "step-line done";
+
+  proceedBtn.disabled = false;
+  proceedBtn.innerText = "Proceed →";
+}
+
+function goBack() {
+  document.getElementById("step1").style.display = "block";
+  document.getElementById("step2").style.display = "none";
+  document.getElementById("status").className = "";
+
+  document.getElementById("indicator-step1").className = "step active";
+  document.getElementById("indicator-step2").className = "step";
+  document.getElementById("line1").className = "step-line";
+}
+
 async function uploadFile() {
-  const file = document.getElementById("fileInput").files[0];
   const btn = document.getElementById("uploadBtn");
-  const pageInfo = document.getElementById("page-info");
-
-  if (!file) {
-    setStatus("❌ Please select a PDF file first.", "error");
-    return;
-  }
-
-  btn.disabled = true;
-
-  setStatus("📄 Reading PDF pages...", "info");
-
-  pageCount = await getPageCount(file);
-  pageInfo.innerText = "📄 Pages: " + pageCount;
-  totalPrice = calculatePrice(pageCount, printType);
-
-document.getElementById("price-info").innerText =
-  "💰 Estimated Price: ₹" + totalPrice;
-
-  if (!file) {
-    setStatus("❌ Please select a PDF file first.", "error");
-    return;
-  }
 
   if (!window.supabase) {
-    setStatus("❌ Supabase failed to load. Please refresh the page.", "error");
+    setStatus("Supabase failed to load. Please refresh the page.", "error");
     return;
   }
 
@@ -240,23 +437,25 @@ document.getElementById("price-info").innerText =
   try {
     client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   } catch (err) {
-    setStatus("❌ Could not connect to database: " + err.message, "error");
+    setStatus("Could not connect to database: " + err.message, "error");
     return;
   }
 
   btn.disabled = true;
-  setStatus("⏳ Uploading... please wait", "info");
+  btn.innerText = "Uploading...";
+  setStatus("Uploading your file, please wait...", "info");
 
   try {
-    const fileName = Date.now() + "_" + file.name;
+    const fileName = Date.now() + "_" + selectedFile.name;
 
-    const { data, error: uploadError } = await client.storage
+    const { error: uploadError } = await client.storage
       .from("print-files")
-      .upload(fileName, file);
+      .upload(fileName, selectedFile);
 
     if (uploadError) {
-      setStatus("❌ Upload failed: " + uploadError.message, "error");
+      setStatus("Upload failed: " + uploadError.message, "error");
       btn.disabled = false;
+      btn.innerText = "Confirm & Upload";
       return;
     }
 
@@ -265,9 +464,9 @@ document.getElementById("price-info").innerText =
       .getPublicUrl(fileName);
 
     const { error: dbError } = await client
-    .from("print_jobs")
+      .from("print_jobs")
       .insert([{
-        file_name: file.name,
+        file_name: selectedFile.name,
         file_url: urlData.publicUrl,
         pages: pageCount,
         print_type: printType,
@@ -275,33 +474,34 @@ document.getElementById("price-info").innerText =
       }]);
 
     if (dbError) {
-      setStatus("❌ Database error: " + dbError.message, "error");
+      setStatus("Database error: " + dbError.message, "error");
       btn.disabled = false;
+      btn.innerText = "Confirm & Upload";
       return;
     }
 
-    setStatus("✅ Uploaded successfully! Check the dashboard to print.", "success");
-    document.getElementById("fileInput").value = "";
-    document.getElementById("file-name").style.display = "none";
-    document.getElementById("uploadArea").classList.remove("has-file");
-  } catch (err) {
-    setStatus("❌ Unexpected error: " + err.message, "error");
-  }
+    setStatus("Uploaded successfully! Check the dashboard to print.", "success");
+    btn.innerText = "Uploaded!";
 
-  btn.disabled = false;
+    setTimeout(function() {
+      selectedFile = null;
+      pageCount = 0;
+      totalPrice = 0;
+      document.getElementById("fileInput").value = "";
+      document.getElementById("file-name").style.display = "none";
+      document.getElementById("uploadArea").classList.remove("has-file");
+      document.getElementById("proceedBtn").disabled = true;
+      document.getElementById("status").className = "";
+      goBack();
+      btn.innerText = "Confirm & Upload";
+    }, 2500);
+
+  } catch (err) {
+    setStatus("Unexpected error: " + err.message, "error");
+    btn.disabled = false;
+    btn.innerText = "Confirm & Upload";
+  }
 }
-  async function getPageCount(file) {
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  return pdf.numPages;
-  }
-  function calculatePrice(pages, type) {
-  if (type === "color") {
-    return pages * COLOR_PRICE;
-  } else {
-    return pages * BW_PRICE;
-  }
-  }
 </script>
 
 </body>
