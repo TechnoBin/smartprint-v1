@@ -5,10 +5,16 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; min-height: 100vh; padding: 28px 20px; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      padding: 28px 20px 100px;
+    }
 
+    /* ── Header ── */
     header {
-      max-width: 760px; margin: 0 auto 20px;
+      max-width: 780px; margin: 0 auto 20px;
       display: flex; align-items: center;
       justify-content: space-between; flex-wrap: wrap; gap: 10px;
     }
@@ -19,127 +25,123 @@
     .count-badge {
       background: #1e293b; color: #fff;
       font-size: 13px; font-weight: 600;
-      padding: 5px 14px; border-radius: 20px;
+      padding: 6px 16px; border-radius: 20px;
     }
 
+    /* ── Filter pills ── */
     .filters {
-      max-width: 760px; margin: 0 auto 12px;
+      max-width: 780px; margin: 0 auto 20px;
       display: flex; gap: 8px; flex-wrap: wrap;
     }
 
     .filter-btn {
-      padding: 6px 16px; border-radius: 20px;
+      padding: 6px 18px; border-radius: 20px;
       font-size: 13px; font-weight: 500;
       cursor: pointer; border: 1.5px solid #e2e8f0;
-      background: #fff; color: #64748b; transition: all 0.15s;
+      background: #fff; color: #64748b;
+      transition: all 0.15s;
     }
 
-    .filter-btn:hover { background: #f1f5f9; }
+    .filter-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
     .filter-btn.active { background: #1e293b; color: #fff; border-color: #1e293b; }
 
-    /* Selection toolbar */
-    .select-bar {
-      max-width: 760px; margin: 0 auto 14px;
-      display: flex; align-items: center;
-      justify-content: space-between; gap: 12px;
-      flex-wrap: wrap;
+    /* ── Job list ── */
+    #jobs {
+      max-width: 780px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 10px;
     }
 
-    .select-bar-left { display: flex; align-items: center; gap: 10px; }
-
-    .select-all-label {
-      display: flex; align-items: center; gap: 7px;
-      font-size: 13px; font-weight: 600; color: #475569;
-      cursor: pointer; user-select: none;
-    }
-
-    .select-all-label input[type="checkbox"] {
-      width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6;
-    }
-
-    .selected-info {
-      font-size: 13px; color: #94a3b8;
-    }
-
-    .btn-delete-selected {
-      display: none;
-      padding: 7px 18px; border-radius: 8px;
-      font-size: 13px; font-weight: 600;
-      cursor: pointer; border: none;
-      background: #ef4444; color: #fff;
-      transition: background 0.15s;
-      align-items: center; gap: 6px;
-    }
-
-    .btn-delete-selected.visible { display: inline-flex; }
-    .btn-delete-selected:hover { background: #dc2626; }
-
-    #jobs { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-
+    /* ── Job card ── */
     .job {
-      background: #fff; border-radius: 14px;
-      padding: 18px 20px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-      display: flex; align-items: center;
-      justify-content: space-between; gap: 14px;
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      gap: 14px;
       border-left: 4px solid #e2e8f0;
-      transition: opacity 0.3s, box-shadow 0.15s;
+      transition: box-shadow 0.15s, border-color 0.15s;
+      position: relative;
     }
 
+    .job:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.09); }
     .job.is-pending { border-left-color: #f59e0b; }
-    .job.is-printed { border-left-color: #22c55e; opacity: 0.65; }
-    .job.is-selected { box-shadow: 0 0 0 2px #3b82f6; opacity: 1 !important; }
-
-    /* Checkbox column */
-    .job-checkbox { flex-shrink: 0; }
-    .job-checkbox input[type="checkbox"] {
-      width: 17px; height: 17px; cursor: pointer; accent-color: #3b82f6;
-    }
-
-    .job-left { display: flex; align-items: center; gap: 14px; overflow: hidden; flex: 1; }
-
-    .job-icon {
-      width: 44px; height: 44px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; flex-shrink: 0;
-      background: #eff6ff;
-    }
-
+    .job.is-printed { border-left-color: #22c55e; }
     .job.is-printed .job-icon { background: #f0fdf4; }
+    .job.is-selected { box-shadow: 0 0 0 2px #3b82f6 !important; }
 
-    .job-details { overflow: hidden; }
+    /* Checkbox — hidden until hover or selected */
+    .job-cb-wrap {
+      width: 20px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.15s;
+    }
+
+    .job:hover .job-cb-wrap,
+    .job.is-selected .job-cb-wrap,
+    .selecting-mode .job-cb-wrap { opacity: 1; }
+
+    .job-cb {
+      width: 17px; height: 17px;
+      cursor: pointer; accent-color: #3b82f6;
+      border-radius: 4px;
+    }
+
+    /* Icon */
+    .job-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: #eff6ff;
+      display: flex; align-items: center;
+      justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+
+    /* Details */
+    .job-details { flex: 1; overflow: hidden; }
 
     .job-customer {
-      font-size: 15px; font-weight: 700; color: #1e293b;
+      font-size: 15px; font-weight: 700;
+      color: #1e293b;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
     .job-filename {
       font-size: 12px; color: #64748b; margin-top: 2px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      max-width: 280px;
     }
 
-    .job-tags { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .job-meta {
+      display: flex; align-items: center;
+      gap: 6px; margin-top: 7px; flex-wrap: wrap;
+    }
 
-    .tag {
+    .pill {
       font-size: 11px; font-weight: 600;
-      padding: 2px 9px; border-radius: 10px;
+      padding: 3px 9px; border-radius: 20px;
     }
 
-    .tag-pending  { background: #fff7ed; color: #c2410c; }
-    .tag-printed  { background: #f0fdf4; color: #15803d; }
-    .tag-info     { background: #f1f5f9; color: #475569; }
-    .tag-time     { background: #f8fafc; color: #94a3b8; font-weight: 500; }
+    .pill-pending { background: #fff7ed; color: #c2410c; }
+    .pill-printed { background: #dcfce7; color: #15803d; }
+    .pill-info    { background: #f1f5f9; color: #475569; }
+    .pill-price   { background: #eff6ff; color: #1d4ed8; }
+    .pill-time    { background: transparent; color: #94a3b8; font-weight: 400; font-size: 11px; }
 
-    .job-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+    /* Action buttons */
+    .job-actions {
+      display: flex; gap: 7px;
+      flex-shrink: 0; align-items: center;
+    }
 
     .btn {
-      padding: 8px 14px; border-radius: 8px;
+      padding: 7px 14px;
+      border-radius: 8px;
       font-size: 13px; font-weight: 600;
-      cursor: pointer; border: none; text-decoration: none;
-      transition: all 0.15s; display: inline-flex;
-      align-items: center; gap: 5px;
+      cursor: pointer; border: none;
+      text-decoration: none;
+      transition: all 0.15s;
+      display: inline-flex; align-items: center; gap: 5px;
     }
 
     .btn-view  { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
@@ -148,16 +150,70 @@
     .btn-print:hover { background: #2563eb; }
     .btn-done  { background: #22c55e; color: #fff; }
     .btn-done:hover { background: #16a34a; }
-    .btn-del   { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
-    .btn-del:hover { background: #fecaca; }
 
+    /* ── Floating action bar ── */
+    .fab {
+      position: fixed;
+      bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1e293b;
+      color: #fff;
+      border-radius: 16px;
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      z-index: 100;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      white-space: nowrap;
+    }
+
+    .fab.visible { transform: translateX(-50%) translateY(0); }
+
+    .fab-count {
+      font-size: 14px; font-weight: 600; color: #e2e8f0;
+    }
+
+    .fab-divider {
+      width: 1px; height: 20px;
+      background: rgba(255,255,255,0.15);
+    }
+
+    .fab-select-all {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; font-weight: 500;
+      color: #94a3b8; cursor: pointer; user-select: none;
+    }
+
+    .fab-select-all input { accent-color: #3b82f6; cursor: pointer; }
+    .fab-select-all:hover { color: #e2e8f0; }
+
+    .fab-delete {
+      background: #ef4444; color: #fff;
+      border: none; border-radius: 10px;
+      padding: 8px 18px;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .fab-delete:hover { background: #dc2626; }
+
+    .fab-cancel {
+      background: transparent; border: none;
+      color: #94a3b8; font-size: 13px;
+      cursor: pointer; padding: 4px 8px;
+      border-radius: 6px; transition: color 0.15s;
+    }
+
+    .fab-cancel:hover { color: #e2e8f0; }
+
+    /* ── Empty / error ── */
     .empty {
       text-align: center; padding: 60px 20px;
       background: #fff; border-radius: 14px; color: #94a3b8;
     }
 
     .empty div { font-size: 42px; margin-bottom: 12px; }
-    .empty p { font-size: 15px; }
+    .empty p   { font-size: 15px; }
   </style>
 </head>
 <body>
@@ -178,20 +234,20 @@
   <button class="filter-btn"        id="filter-color"   onclick="setFilter('color')">Color</button>
 </div>
 
-<div class="select-bar">
-  <div class="select-bar-left">
-    <label class="select-all-label">
-      <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" />
-      Select All
-    </label>
-    <span class="selected-info" id="selectedInfo"></span>
-  </div>
-  <button class="btn-delete-selected" id="btnDeleteSelected" onclick="deleteSelected()">
-    🗑️ Delete Selected
-  </button>
-</div>
-
 <div id="jobs"><p style="text-align:center;padding:40px;color:#94a3b8;">Loading jobs...</p></div>
+
+<!-- Floating action bar (appears when ≥1 selected) -->
+<div class="fab" id="fab">
+  <span class="fab-count" id="fabCount">0 selected</span>
+  <div class="fab-divider"></div>
+  <label class="fab-select-all">
+    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" />
+    Select all
+  </label>
+  <div class="fab-divider"></div>
+  <button class="fab-delete" onclick="deleteSelected()">🗑️ Delete</button>
+  <button class="fab-cancel" onclick="clearSelection()">✕ Cancel</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -200,13 +256,15 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentFilter = "all";
-let autoRefreshTimer = null;
 
 function formatTime(d) {
   const date = new Date(d);
-  const now = new Date();
+  const now  = new Date();
   const mins = Math.floor((now - date) / 60000);
-  let ago = mins < 1 ? "just now" : mins < 60 ? mins + "m ago" : mins < 1440 ? Math.floor(mins/60) + "h ago" : Math.floor(mins/1440) + "d ago";
+  const ago  = mins < 1  ? "just now"
+             : mins < 60 ? mins + "m ago"
+             : mins < 1440 ? Math.floor(mins / 60) + "h ago"
+             : Math.floor(mins / 1440) + "d ago";
   const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   const dateStr = date.toLocaleDateString([], { day: "numeric", month: "short" });
   return (now.toDateString() === date.toDateString() ? timeStr : dateStr + " " + timeStr) + " · " + ago;
@@ -216,63 +274,65 @@ function setFilter(type) {
   currentFilter = type;
   document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
   document.getElementById("filter-" + type).classList.add("active");
-  document.getElementById("selectAll").checked = false;
+  clearSelection();
   loadJobs();
 }
 
-function onCheckboxChange() {
-  const allBoxes = document.querySelectorAll(".job-checkbox-input");
-  const checkedBoxes = document.querySelectorAll(".job-checkbox-input:checked");
-  const count = checkedBoxes.length;
+/* ── Selection ── */
+function getChecked() { return document.querySelectorAll(".job-cb:checked"); }
 
-  document.getElementById("selectAll").checked = allBoxes.length > 0 && count === allBoxes.length;
-  document.getElementById("selectAll").indeterminate = count > 0 && count < allBoxes.length;
+function syncFab() {
+  const checked = getChecked();
+  const count   = checked.length;
+  const fab     = document.getElementById("fab");
+  const allCbs  = document.querySelectorAll(".job-cb");
 
-  const info = document.getElementById("selectedInfo");
-  info.innerText = count > 0 ? count + " selected" : "";
+  fab.classList.toggle("visible", count > 0);
+  document.getElementById("fabCount").innerText = count + " selected";
 
-  const delBtn = document.getElementById("btnDeleteSelected");
-  if (count > 0) delBtn.classList.add("visible");
-  else delBtn.classList.remove("visible");
+  const sa = document.getElementById("selectAll");
+  sa.checked       = allCbs.length > 0 && count === allCbs.length;
+  sa.indeterminate = count > 0 && count < allCbs.length;
 
+  // highlight selected cards
   document.querySelectorAll(".job").forEach(card => {
-    const cb = card.querySelector(".job-checkbox-input");
-    if (cb && cb.checked) card.classList.add("is-selected");
-    else card.classList.remove("is-selected");
+    const cb = card.querySelector(".job-cb");
+    card.classList.toggle("is-selected", cb && cb.checked);
   });
+
+  // keep checkboxes visible on all cards while any is selected
+  document.getElementById("jobs").classList.toggle("selecting-mode", count > 0);
 }
 
 function toggleSelectAll() {
   const checked = document.getElementById("selectAll").checked;
-  document.querySelectorAll(".job-checkbox-input").forEach(cb => cb.checked = checked);
-  onCheckboxChange();
+  document.querySelectorAll(".job-cb").forEach(cb => cb.checked = checked);
+  syncFab();
 }
 
-async function markDone(id) {
-  const { error } = await client.from("print_jobs").update({ status: "printed" }).eq("id", id);
-  if (error) { alert("Error: " + error.message); return; }
-  loadJobs();
-}
-
-async function deleteSingle(id) {
-  if (!confirm("Delete this job?")) return;
-  const { error } = await client.from("print_jobs").delete().eq("id", id);
-  if (error) { alert("Delete failed: " + error.message); return; }
-  loadJobs();
+function clearSelection() {
+  document.querySelectorAll(".job-cb").forEach(cb => cb.checked = false);
+  document.getElementById("selectAll").checked = false;
+  document.getElementById("fab").classList.remove("visible");
+  document.getElementById("jobs").classList.remove("selecting-mode");
 }
 
 async function deleteSelected() {
-  const checked = document.querySelectorAll(".job-checkbox-input:checked");
-  if (checked.length === 0) return;
-  if (!confirm("Delete " + checked.length + " selected job(s)? This cannot be undone.")) return;
+  const checked = getChecked();
+  if (!checked.length) return;
+  if (!confirm("Delete " + checked.length + " job(s)? This cannot be undone.")) return;
 
   const ids = Array.from(checked).map(cb => cb.dataset.id);
   const { error } = await client.from("print_jobs").delete().in("id", ids);
   if (error) { alert("Delete failed: " + error.message); return; }
+  clearSelection();
+  loadJobs();
+}
 
-  document.getElementById("selectAll").checked = false;
-  document.getElementById("selectedInfo").innerText = "";
-  document.getElementById("btnDeleteSelected").classList.remove("visible");
+/* ── Individual actions ── */
+async function markDone(id) {
+  const { error } = await client.from("print_jobs").update({ status: "printed" }).eq("id", id);
+  if (error) { alert("Error: " + error.message); return; }
   loadJobs();
 }
 
@@ -282,6 +342,7 @@ function printJob(url) {
   win.onload = () => setTimeout(() => win.print(), 600);
 }
 
+/* ── Load ── */
 async function loadJobs() {
   let q = client.from("print_jobs").select("*").order("created_at", { ascending: false });
   if (currentFilter === "pending") q = q.eq("status", "pending");
@@ -300,43 +361,46 @@ async function loadJobs() {
   document.getElementById("count").innerText = (data ? data.length : 0) + " job(s)";
 
   if (!data || data.length === 0) {
-    container.innerHTML = '<div class="empty"><div>📭</div><p>No jobs found.</p></div>';
+    container.innerHTML = '<div class="empty"><div>📭</div><p>No print jobs yet.</p></div>';
     return;
   }
 
   container.innerHTML = data.map(job => {
-    const done = job.status === "printed";
-    const type = job.print_type === "color" ? "Color" : "B&W";
+    const done     = job.status === "printed";
+    const type     = job.print_type === "color" ? "Color" : "B&W";
     const customer = job.customer_name || "Unknown";
+    const price    = job.price ? "Rs." + job.price : "";
+    const pages    = job.pages ? job.pages + " pg" : "";
 
-    return '<div class="job ' + (done ? "is-printed" : "is-pending") + '" id="job-' + job.id + '">' +
-      '<div class="job-checkbox">' +
-        '<input type="checkbox" class="job-checkbox-input" data-id="' + job.id + '" onchange="onCheckboxChange()" />' +
-      '</div>' +
-      '<div class="job-left">' +
-        '<div class="job-icon">' + (done ? "✅" : "📄") + '</div>' +
-        '<div class="job-details">' +
-          '<div class="job-customer">👤 ' + customer + '</div>' +
-          '<div class="job-filename">📎 ' + job.file_name + '</div>' +
-          '<div class="job-tags">' +
-            '<span class="tag ' + (done ? "tag-printed" : "tag-pending") + '">' + (done ? "✅ Printed" : "⏳ Pending") + '</span>' +
-            (job.pages    ? '<span class="tag tag-info">' + job.pages + ' pages</span>' : '') +
-            '<span class="tag tag-info">' + type + '</span>' +
-            (job.price    ? '<span class="tag tag-info">Rs.' + job.price + '</span>' : '') +
-            (job.created_at ? '<span class="tag tag-time">' + formatTime(job.created_at) + '</span>' : '') +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="job-actions">' +
-        '<a class="btn btn-view" href="' + job.file_url + '" target="_blank">View</a>' +
-        '<button class="btn btn-print" onclick="printJob(\'' + job.file_url + '\')">🖨️ Print</button>' +
-        (!done ? '<button class="btn btn-done" onclick="markDone(\'' + job.id + '\')">✔ Done</button>' : '') +
-        '<button class="btn btn-del" onclick="deleteSingle(\'' + job.id + '\')">🗑️</button>' +
-      '</div>' +
-    '</div>';
+    return `
+      <div class="job ${done ? "is-printed" : "is-pending"}" id="job-${job.id}">
+
+        <div class="job-cb-wrap">
+          <input class="job-cb" type="checkbox" data-id="${job.id}" onchange="syncFab()" />
+        </div>
+
+        <div class="job-icon">${done ? "✅" : "📄"}</div>
+
+        <div class="job-details">
+          <div class="job-customer">👤 ${customer}</div>
+          <div class="job-filename">📎 ${job.file_name}</div>
+          <div class="job-meta">
+            <span class="pill ${done ? "pill-printed" : "pill-pending"}">${done ? "✅ Printed" : "⏳ Pending"}</span>
+            ${pages  ? `<span class="pill pill-info">${pages}</span>` : ""}
+            <span class="pill pill-info">${type}</span>
+            ${price  ? `<span class="pill pill-price">${price}</span>` : ""}
+            ${job.created_at ? `<span class="pill-time">${formatTime(job.created_at)}</span>` : ""}
+          </div>
+        </div>
+
+        <div class="job-actions">
+          <a class="btn btn-view" href="${job.file_url}" target="_blank">View</a>
+          <button class="btn btn-print" onclick="printJob('${job.file_url}')">🖨️ Print</button>
+          ${!done ? `<button class="btn btn-done" onclick="markDone('${job.id}')">✔ Done</button>` : ""}
+        </div>
+
+      </div>`;
   }).join("");
-
-  onCheckboxChange();
 }
 
 loadJobs();
