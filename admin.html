@@ -66,9 +66,11 @@
     }
 
     .job:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.09); }
-    .job.is-pending { border-left-color: #f59e0b; }
-    .job.is-printed { border-left-color: #22c55e; }
-    .job.is-printed .job-icon { background: #f0fdf4; }
+    .job.is-pending  { border-left-color: #f59e0b; }
+    .job.is-printing { border-left-color: #3b82f6; }
+    .job.is-printing .job-icon { background: #eff6ff; }
+    .job.is-printed  { border-left-color: #22c55e; }
+    .job.is-printed .job-icon  { background: #f0fdf4; }
     .job.is-selected { box-shadow: 0 0 0 2px #3b82f6 !important; }
 
     /* Checkbox — hidden until hover or selected */
@@ -122,11 +124,12 @@
       padding: 3px 9px; border-radius: 20px;
     }
 
-    .pill-pending { background: #fff7ed; color: #c2410c; }
-    .pill-printed { background: #dcfce7; color: #15803d; }
-    .pill-info    { background: #f1f5f9; color: #475569; }
-    .pill-price   { background: #eff6ff; color: #1d4ed8; }
-    .pill-time    { background: transparent; color: #94a3b8; font-weight: 400; font-size: 11px; }
+    .pill-pending  { background: #fff7ed; color: #c2410c; }
+    .pill-printing { background: #eff6ff; color: #1d4ed8; }
+    .pill-printed  { background: #dcfce7; color: #15803d; }
+    .pill-info     { background: #f1f5f9; color: #475569; }
+    .pill-price    { background: #f5f3ff; color: #6d28d9; }
+    .pill-time     { background: transparent; color: #94a3b8; font-weight: 400; font-size: 11px; }
 
     /* Action buttons */
     .job-actions {
@@ -230,11 +233,12 @@
 </header>
 
 <div class="filters">
-  <button class="filter-btn active" id="filter-all"     onclick="setFilter('all')">All</button>
-  <button class="filter-btn"        id="filter-pending" onclick="setFilter('pending')">⏳ Pending</button>
-  <button class="filter-btn"        id="filter-printed" onclick="setFilter('printed')">✅ Printed</button>
-  <button class="filter-btn"        id="filter-bw"      onclick="setFilter('bw')">B&amp;W</button>
-  <button class="filter-btn"        id="filter-color"   onclick="setFilter('color')">Color</button>
+  <button class="filter-btn active" id="filter-all"      onclick="setFilter('all')">All</button>
+  <button class="filter-btn"        id="filter-pending"  onclick="setFilter('pending')">⏳ Pending</button>
+  <button class="filter-btn"        id="filter-printing" onclick="setFilter('printing')">🖨️ Printing</button>
+  <button class="filter-btn"        id="filter-printed"  onclick="setFilter('printed')">✅ Printed</button>
+  <button class="filter-btn"        id="filter-bw"       onclick="setFilter('bw')">B&amp;W</button>
+  <button class="filter-btn"        id="filter-color"    onclick="setFilter('color')">Color</button>
 </div>
 
 <div id="jobs"><p style="text-align:center;padding:40px;color:#94a3b8;">Loading jobs...</p></div>
@@ -339,7 +343,9 @@ async function markDone(id) {
   loadJobs();
 }
 
-function printJob(url) {
+async function printJob(id, url) {
+  await client.from("print_jobs").update({ status: "printing" }).eq("id", id);
+  loadJobs();
   const win = window.open(url);
   if (!win) { alert("Please allow popups to print."); return; }
   win.onload = () => setTimeout(() => win.print(), 600);
@@ -352,10 +358,11 @@ async function loadJobs() {
     Array.from(document.querySelectorAll(".job-cb:checked")).map(cb => cb.dataset.id)
   );
   let q = client.from("print_jobs").select("*").order("created_at", { ascending: false });
-  if (currentFilter === "pending") q = q.eq("status", "pending");
-  if (currentFilter === "printed") q = q.eq("status", "printed");
-  if (currentFilter === "bw")      q = q.eq("print_type", "bw");
-  if (currentFilter === "color")   q = q.eq("print_type", "color");
+  if (currentFilter === "pending")  q = q.eq("status", "pending");
+  if (currentFilter === "printing") q = q.eq("status", "printing");
+  if (currentFilter === "printed")  q = q.eq("status", "printed");
+  if (currentFilter === "bw")       q = q.eq("print_type", "bw");
+  if (currentFilter === "color")    q = q.eq("print_type", "color");
 
   const { data, error } = await q;
   const container = document.getElementById("jobs");
@@ -373,37 +380,44 @@ async function loadJobs() {
   }
 
   container.innerHTML = data.map((job) => {
-    const done     = job.status === "printed";
+    const status   = job.status || "pending";
+    const isPrinted  = status === "printed";
+    const isPrinting = status === "printing";
     const type     = job.print_type === "color" ? "Color" : "B&W";
     const customer = job.customer_name || "Unknown";
     const price    = job.price ? "Rs." + job.price : "";
     const pages    = job.pages ? job.pages + " pg" : "";
 
+    const cardClass  = isPrinted ? "is-printed" : isPrinting ? "is-printing" : "is-pending";
+    const icon       = isPrinted ? "✅" : isPrinting ? "🖨️" : "📄";
+    const pillClass  = isPrinted ? "pill-printed" : isPrinting ? "pill-printing" : "pill-pending";
+    const pillLabel  = isPrinted ? "✅ Printed"   : isPrinting ? "🖨️ Printing"  : "⏳ Pending";
+
     return `
-      <div class="job ${done ? "is-printed" : "is-pending"}" id="job-${job.id}">
+      <div class="job ${cardClass}" id="job-${job.id}">
 
         <div class="job-cb-wrap">
           <input class="job-cb" type="checkbox" data-id="${job.id}" onchange="syncFab()" />
         </div>
 
-        <div class="job-icon">${done ? "✅" : "📄"}</div>
+        <div class="job-icon">${icon}</div>
 
         <div class="job-details">
           <div class="job-customer">👤 ${customer}</div>
           <div class="job-filename">📎 ${job.file_name}</div>
           <div class="job-meta">
-            <span class="pill ${done ? "pill-printed" : "pill-pending"}">${done ? "✅ Printed" : "⏳ Pending"}</span>
-            ${pages  ? `<span class="pill pill-info">${pages}</span>` : ""}
+            <span class="pill ${pillClass}">${pillLabel}</span>
+            ${pages ? `<span class="pill pill-info">${pages}</span>` : ""}
             <span class="pill pill-info">${type}</span>
-            ${price  ? `<span class="pill pill-price">${price}</span>` : ""}
+            ${price ? `<span class="pill pill-price">${price}</span>` : ""}
             ${job.created_at ? `<span class="pill-time">${formatTime(job.created_at)}</span>` : ""}
           </div>
         </div>
 
         <div class="job-actions">
           <a class="btn btn-view" href="${job.file_url}" target="_blank">View</a>
-          <button class="btn btn-print" onclick="printJob('${job.file_url}')">🖨️ Print</button>
-          ${!done ? `<button class="btn btn-done" onclick="markDone('${job.id}')">✔ Done</button>` : ""}
+          ${!isPrinted ? `<button class="btn btn-print" onclick="printJob('${job.id}', '${job.file_url}')">🖨️ Print</button>` : ""}
+          ${!isPrinted ? `<button class="btn btn-done" onclick="markDone('${job.id}')">✔ Done</button>` : ""}
         </div>
 
       </div>`;
