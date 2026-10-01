@@ -615,10 +615,7 @@ async function restorePrintState() {
   btn.disabled = true;
   btn.textContent = "Uploading...";
 
-  setStatus(
-    "Uploading your PDF, please wait...",
-    "info"
-  );
+  setStatus("Uploading your PDF, please wait...", "info");
 
   try {
     const fileName =
@@ -628,38 +625,26 @@ async function restorePrintState() {
       "_" +
       selectedFile.name;
 
-    const {
-      error: uploadError
-    } = await client
-      .storage
-      .from("print-files")
-      .upload(
-        fileName,
-        selectedFile,
-        {
+    const { error: uploadError } =
+      await client.storage
+        .from("print-files")
+        .upload(fileName, selectedFile, {
           contentType: "application/pdf",
           upsert: false
-        }
-      );
+        });
 
     if (uploadError) {
-      throw new Error(
-        "Upload failed: " + uploadError.message
-      );
+      throw new Error("Upload failed: " + uploadError.message);
     }
 
-    const {
-      data: urlData
-    } = client
-      .storage
-      .from("print-files")
-      .getPublicUrl(fileName);
+    const { data: urlData } =
+      client.storage
+        .from("print-files")
+        .getPublicUrl(fileName);
 
     const total =
       pageCount *
-      (printType === "color"
-        ? COLOR_PRICE
-        : BW_PRICE);
+      (printType === "color" ? COLOR_PRICE : BW_PRICE);
 
     const {
       data: jobData,
@@ -676,26 +661,15 @@ async function restorePrintState() {
         price: total,
         status: "pending"
       }])
-      .select(
-        "id,status,file_name,created_at,updated_at,pages,print_type"
-      )
+      .select("id,status,file_name,created_at")
       .single();
 
     if (dbError) {
-      throw new Error(
-        "Database error: " + dbError.message
-      );
+      throw new Error("Database error: " + dbError.message);
     }
 
-    /*
-      This is now the active job.
-    */
     currentJobId = jobData.id;
-
-    localStorage.setItem(
-      JOB_KEY,
-      currentJobId
-    );
+    localStorage.setItem(JOB_KEY, currentJobId);
 
     setStatus(
       "Your PDF has been uploaded successfully.",
@@ -714,16 +688,12 @@ async function restorePrintState() {
 
     resetFileUI();
 
-    /*
-      Reload history immediately so the new file
-      appears at the top.
-    */
+    // Update history after successful upload
     await loadPrintHistory();
 
     startPolling();
 
   } catch (err) {
-
     console.error(err);
 
     setStatus(
@@ -735,6 +705,7 @@ async function restorePrintState() {
     btn.textContent = "Upload & Print";
   }
 }
+
 
 function startNewPrint() {
   /*
