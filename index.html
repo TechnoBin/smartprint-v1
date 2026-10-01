@@ -604,8 +604,179 @@ async function restorePrintState() {
 
   stopPolling();
 }
+  async function uploadFile() {
+  const btn = document.getElementById("uploadBtn");
+  const name = document.getElementById("customerName").value.trim();
+
+  if (!selectedFile || !name) return;
+
+  localStorage.setItem(NAME_KEY, name);
+
+  btn.disabled = true;
+  btn.textContent = "Uploading...";
+
+  setStatus(
+    "Uploading your PDF, please wait...",
+    "info"
+  );
+
+  try {
+    const fileName =
+      Date.now() +
+      "_" +
+      Math.random().toString(36).slice(2, 8) +
+      "_" +
+      selectedFile.name;
+
+    const {
+      error: uploadError
+    } = await client
+      .storage
+      .from("print-files")
+      .upload(
+        fileName,
+        selectedFile,
+        {
+          contentType: "application/pdf",
+          upsert: false
+        }
+      );
+
+    if (uploadError) {
+      throw new Error(
+        "Upload failed: " + uploadError.message
+      );
+    }
+
+    const {
+      data: urlData
+    } = client
+      .storage
+      .from("print-files")
+      .getPublicUrl(fileName);
+
+    const total =
+      pageCount *
+      (printType === "color"
+        ? COLOR_PRICE
+        : BW_PRICE);
+
+    const {
+      data: jobData,
+      error: dbError
+    } = await client
+      .from("print_jobs")
+      .insert([{
+        customer_name: name,
+        device_id: deviceId,
+        file_name: selectedFile.name,
+        file_url: urlData.publicUrl,
+        pages: pageCount,
+        print_type: printType,
+        price: total,
+        status: "pending"
+      }])
+      .select(
+        "id,status,file_name,created_at,updated_at,pages,print_type"
+      )
+      .single();
+
+    if (dbError) {
+      throw new Error(
+        "Database error: " + dbError.message
+      );
+    }
+
+    /*
+      This is now the active job.
+    */
+    currentJobId = jobData.id;
+
+    localStorage.setItem(
+      JOB_KEY,
+      currentJobId
+    );
+
+    setStatus(
+      "Your PDF has been uploaded successfully.",
+      "success"
+    );
+
+    updatePrintStatus(
+      "pending",
+      jobData.file_name,
+      jobData.created_at
+    );
+
+    btn.textContent = "Uploaded ✓";
+
+    document.getElementById("summary").style.display = "none";
+
+    resetFileUI();
+
+    /*
+      Reload history immediately so the new file
+      appears at the top.
+    */
+    await loadPrintHistory();
+
+    startPolling();
+
+  } catch (err) {
+
+    console.error(err);
+
+    setStatus(
+      err.message || "Something went wrong.",
+      "error"
+    );
+
+    btn.disabled = false;
+    btn.textContent = "Upload & Print";
+  }
+}
+
+function startNewPrint() {
+  /*
+    Don't delete print history.
+    Supabase is now responsible for remembering
+    previous jobs.
+  */
+
+  stopPolling();
+
+  currentJobId = null;
+
+  document.getElementById("printStatus").className =
+    "print-status";
+
+  document.getElementById("secondaryActions")
+    .classList.remove("show");
+
+  setStatus("", " ");
+
+  resetFileUI();
+
+  document.getElementById("uploadBtn").textContent =
+    "Upload & Print";
+
+  document.getElementById("customerName").value =
+    localStorage.getItem(NAME_KEY) || "";
+
+  checkReady();
+
+  /*
+    History stays visible.
+  */
+  loadPrintHistory();
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
 setWelcome();
-restoreLastJob();
+restorePrintState());
 </script>
 </body>
 </html>
