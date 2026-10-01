@@ -1,42 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0f172a"><title>SmartPrint Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>SmartPrint Dashboard</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:#f1f5f9;min-height:100vh;color:#0f172a;padding:18px 12px 100px}.wrap{max-width:920px;margin:auto}.header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.header h1{font-size:22px;letter-spacing:-.3px}.header p{font-size:12px;color:#94a3b8;margin-top:3px}.count{background:#0f172a;color:#fff;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;white-space:nowrap}.filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}.filters::-webkit-scrollbar{display:none}.filter{flex:0 0 auto;padding:8px 13px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer}.filter.active{background:#0f172a;color:#fff;border-color:#0f172a}.jobs{display:flex;flex-direction:column;gap:10px}.job{background:#fff;border-radius:15px;padding:14px;border-left:4px solid #e2e8f0;box-shadow:0 2px 7px rgba(15,23,42,.05);display:grid;grid-template-columns:auto 44px minmax(0,1fr) auto;gap:12px;align-items:center}.job.is-pending{border-left-color:#f59e0b}.job.is-printing{border-left-color:#3b82f6}.job.is-printed{border-left-color:#22c55e}.cb{width:18px;height:18px;accent-color:#2563eb}.icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#eff6ff;font-size:21px}.is-printing .icon{background:#eff6ff}.is-printed .icon{background:#f0fdf4}.details{min-width:0}.customer{font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.filename{font-size:12px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.pill{font-size:10px;font-weight:750;padding:4px 8px;border-radius:999px;background:#f1f5f9;color:#475569}.pending{background:#fff7ed;color:#c2410c}.printing{background:#eff6ff;color:#1d4ed8}.printed{background:#dcfce7;color:#15803d}.price{background:#f5f3ff;color:#6d28d9}.time{color:#94a3b8;background:transparent;font-weight:500}.actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.btn{border:0;border-radius:99px;padding:8px 11px;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}.view{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}.print{background:#2563eb;color:#fff}.done{background:#16a34a;color:#fff}.btn:disabled{opacity:.55;cursor:not-allowed}.empty{text-align:center;background:#fff;border-radius:15px;padding:60px 20px;color:#94a3b8}.empty-icon{font-size:42px;margin-bottom:10px}.fab{position:fixed;left:50%;bottom:16px;transform:translate(-50%,130px);background:#0f172a;color:#fff;border-radius:16px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(15,23,42,.25);transition:.25s;z-index:5}.fab.visible{transform:translate(-50%,0)}.fab button{border:0;border-radius:9px;padding:8px 12px;font-weight:800;cursor:pointer}.delete{background:#ef4444;color:#fff}.cancel{background:transparent;color:#cbd5e1}.selectall{font-size:11px;color:#cbd5e1;display:flex;gap:6px;align-items:center;white-space:nowrap}.refreshing{opacity:.65}
-@media(max-width:680px){body{padding:12px 10px 90px}.header h1{font-size:19px}.job{grid-template-columns:auto 40px minmax(0,1fr);padding:12px;gap:9px}.icon{width:40px;height:40px}.actions{grid-column:2 / -1;justify-content:stretch}.actions .btn{flex:1;min-height:40px}.job-customer{font-size:13px}.fab{width:calc(100% - 20px);justify-content:center}.fab .divider{display:none}.fab-count{font-size:12px}}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; background: #f1f5f9; min-height: 100vh; color: #0f172a; padding: 18px 12px 100px; }
+.wrap { max-width: 920px; margin: auto; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.header h1 { font-size: 22px; letter-spacing: -.3px; }
+.header p { font-size: 12px; color: #94a3b8; margin-top: 3px; }
+.count { background: #0f172a; color: #fff; border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 800; white-space: nowrap; }
+
+/* Controls & Search */
+.controls-wrap { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.search-wrap { position: relative; width: 100%; }
+.search-wrap input { width: 100%; padding: 11px 14px 11px 38px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; outline: none; background: #fff; color: #0f172a; transition: border-color .15s, box-shadow .15s; }
+.search-wrap input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #94a3b8; pointer-events: none; }
+
+.filters-row { display: flex; align-items: center; gap: 10px; }
+.filter-group-label { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: .05em; min-width: 80px; flex-shrink: 0; }
+.filters { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; flex-wrap: wrap; }
+.filters::-webkit-scrollbar { display: none; }
+.filter { flex: 0 0 auto; padding: 7px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; border: 1px solid #e2e8f0; background: #fff; color: #64748b; cursor: pointer; transition: .15s; }
+.filter.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+
+/* Job Cards */
+.jobs { display: flex; flex-direction: column; gap: 10px; }
+.job { background: #fff; border-radius: 15px; padding: 14px; border-left: 4px solid #e2e8f0; box-shadow: 0 2px 7px rgba(15,23,42,.05); display: grid; grid-template-columns: auto 44px minmax(0,1fr) auto; gap: 12px; align-items: center; }
+.job.is-pending { border-left-color: #f59e0b; }
+.job.is-printing { border-left-color: #3b82f6; }
+.job.is-printed { border-left-color: #22c55e; }
+.cb { width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; }
+.icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: #eff6ff; font-size: 21px; }
+.is-printing .icon { background: #eff6ff; }
+.is-printed .icon { background: #f0fdf4; }
+.details { min-width: 0; }
+.customer { font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.filename { font-size: 12px; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.pill { font-size: 10px; font-weight: 750; padding: 4px 8px; border-radius: 999px; background: #f1f5f9; color: #475569; }
+.pending { background: #fff7ed; color: #c2410c; }
+.printing { background: #eff6ff; color: #1d4ed8; }
+.printed { background: #dcfce7; color: #15803d; }
+.price { background: #f5f3ff; color: #6d28d9; }
+.time { color: #94a3b8; background: transparent; font-weight: 500; }
+
+.actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.btn { border: 0; border-radius: 9px; padding: 8px 11px; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+.view { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+.print { background: #2563eb; color: #fff; }
+.done { background: #16a34a; color: #fff; }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+
+.empty { text-align: center; background: #fff; border-radius: 15px; padding: 50px 20px; color: #94a3b8; }
+.empty-icon { font-size: 42px; margin-bottom: 10px; }
+
+/* Floating Action Bar */
+.fab { position: fixed; left: 50%; bottom: 16px; transform: translate(-50%,130px); background: #0f172a; color: #fff; border-radius: 16px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 12px 30px rgba(15,23,42,.25); transition: .25s; z-index: 5; }
+.fab.visible { transform: translate(-50%,0); }
+.fab button { border: 0; border-radius: 9px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
+.delete { background: #ef4444; color: #fff; }
+.cancel { background: transparent; color: #cbd5e1; }
+.selectall { font-size: 11px; color: #cbd5e1; display: flex; gap: 6px; align-items: center; white-space: nowrap; cursor: pointer; }
+
+@media(max-width:680px){
+  body { padding: 12px 10px 90px; }
+  .header h1 { font-size: 19px; }
+  .filters-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .filter-group-label { min-width: auto; }
+  .job { grid-template-columns: auto 40px minmax(0,1fr); padding: 12px; gap: 9px; }
+  .icon { width: 40px; height: 40px; }
+  .actions { grid-column: 2 / -1; justify-content: stretch; }
+  .actions .btn { flex: 1; min-height: 40px; }
+  .fab { width: calc(100% - 20px); justify-content: center; }
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header class="header"><div><h1>🖨️ Print Dashboard</h1><p>Auto-refreshes every 5 seconds</p></div><span class="count" id="count">Loading...</span></header>
-<div class="filters"><button class="filter active" id="filter-all" onclick="setFilter('all')">All</button><button class="filter" id="filter-pending" onclick="setFilter('pending')">⏳ Pending</button><button class="filter" id="filter-printing" onclick="setFilter('printing')">🖨️ Printing</button><button class="filter" id="filter-printed" onclick="setFilter('printed')">✅ Printed</button><button class="filter" id="filter-bw" onclick="setFilter('bw')">B&amp;W</button><button class="filter" id="filter-color" onclick="setFilter('color')">Color</button></div>
-<div id="jobs" class="jobs"><div class="empty"><div class="empty-icon">⏳</div><p>Loading jobs...</p></div></div>
+  <header class="header">
+    <div>
+      <h1>🖨️ Print Dashboard</h1>
+      <p>Auto-refreshes every 5 seconds</p>
+    </div>
+    <span class="count" id="count">Loading...</span>
+  </header>
+
+  <div class="controls-wrap">
+    <!-- Live Search Bar -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search customer name or file..." oninput="onSearchInput()">
+    </div>
+
+    <!-- Status / Type Filters -->
+    <div class="filters-row">
+      <div class="filter-group-label">Status:</div>
+      <div class="filters">
+        <button class="filter active" id="filter-all" onclick="setFilter('all')">All</button>
+        <button class="filter" id="filter-pending" onclick="setFilter('pending')">⏳ Pending</button>
+        <button class="filter" id="filter-printing" onclick="setFilter('printing')">🖨️ Printing</button>
+        <button class="filter" id="filter-printed" onclick="setFilter('printed')">✅ Printed</button>
+        <button class="filter" id="filter-bw" onclick="setFilter('bw')">B&amp;W</button>
+        <button class="filter" id="filter-color" onclick="setFilter('color')">Color</button>
+      </div>
+    </div>
+
+    <!-- Date Range Filters -->
+    <div class="filters-row">
+      <div class="filter-group-label">Date:</div>
+      <div class="filters">
+        <button class="filter date-filter active" id="date-all" onclick="setDateFilter('all')">All Time</button>
+        <button class="filter date-filter" id="date-today" onclick="setDateFilter('today')">Today</button>
+        <button class="filter date-filter" id="date-yesterday" onclick="setDateFilter('yesterday')">Yesterday</button>
+        <button class="filter date-filter" id="date-week" onclick="setDateFilter('week')">This Week</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="jobs" class="jobs">
+    <div class="empty"><div class="empty-icon">⏳</div><p>Loading jobs...</p></div>
+  </div>
 </div>
-<div class="fab" id="fab"><span id="fabCount">0 selected</span><label class="selectall"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"> Select all</label><button class="delete" onclick="deleteSelected()">🗑️ Delete</button><button class="cancel" onclick="clearSelection()">Cancel</button></div>
+
+<div class="fab" id="fab">
+  <span id="fabCount">0 selected</span>
+  <label class="selectall"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"> Select all</label>
+  <button class="delete" onclick="deleteSelected()">🗑️ Delete</button>
+  <button class="cancel" onclick="clearSelection()">Cancel</button>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_muM1Xml6MpBwct6-kpvZXg_ejuz9Z8V";
 
 const client = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
 );
   
 let currentFilter = "all";
+let currentDateFilter = "all";
+let searchQuery = "";
 
-function esc(v){
+function esc(v) {
   return String(v??"").replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 }
 
-// Helper to safely parse UTC strings from Supabase into local Date objects
+// Safely parse UTC timestamp from Supabase into local Date
 function parseDate(dateValue) {
   if (!dateValue) return null;
   if (dateValue instanceof Date) return dateValue;
 
   let str = String(dateValue).trim().replace(" ", "T");
-
   if (!str.endsWith("Z") && !/[+-]\d{2}:?\d{2}$/.test(str)) {
     str += "Z";
   }
@@ -58,17 +179,57 @@ function formatTime(d) {
   return (now.toDateString() === date.toDateString() ? t : ds + " " + t) + " · " + ago;
 }
 
-function setFilter(type){
+function setFilter(type) {
   currentFilter = type;
-  document.querySelectorAll(".filter").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".filters .filter:not(.date-filter)").forEach(b => b.classList.remove("active"));
   document.getElementById("filter-" + type).classList.add("active");
   clearSelection();
   loadJobs();
 }
 
-function getChecked(){ return document.querySelectorAll(".job-cb:checked"); }
+function setDateFilter(range) {
+  currentDateFilter = range;
+  document.querySelectorAll(".date-filter").forEach(b => b.classList.remove("active"));
+  document.getElementById("date-" + range).classList.add("active");
+  clearSelection();
+  loadJobs();
+}
 
-function syncFab(){
+function onSearchInput() {
+  searchQuery = document.getElementById("searchInput").value.trim().toLowerCase();
+  loadJobs();
+}
+
+function matchesDateRange(jobDateStr, range) {
+  if (range === "all") return true;
+  const date = parseDate(jobDateStr);
+  if (!date) return false;
+
+  const today = new Date();
+  const targetDate = new Date(date);
+
+  if (range === "today") {
+    return targetDate.toDateString() === today.toDateString();
+  }
+
+  if (range === "yesterday") {
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+    return targetDate.toDateString() === yesterday.toDateString();
+  }
+
+  if (range === "week") {
+    const diffTime = Math.abs(today - targetDate);
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+    return diffDays <= 7;
+  }
+
+  return true;
+}
+
+function getChecked() { return document.querySelectorAll(".job-cb:checked"); }
+
+function syncFab() {
   const c = getChecked().length;
   document.getElementById("fab").classList.toggle("visible", c > 0);
   document.getElementById("fabCount").textContent = c + " selected";
@@ -76,75 +237,126 @@ function syncFab(){
   const sa = document.getElementById("selectAll");
   sa.checked = all.length > 0 && c === all.length;
   sa.indeterminate = c > 0 && c < all.length;
-  document.querySelectorAll(".job").forEach(card => {
-    const cb = card.querySelector(".job-cb");
-    card.classList.toggle("selected", cb && cb.checked);
-  });
 }
 
-function toggleSelectAll(){
+function toggleSelectAll() {
   const v = document.getElementById("selectAll").checked;
   document.querySelectorAll(".job-cb").forEach(cb => cb.checked = v);
   syncFab();
 }
 
-function clearSelection(){
+function clearSelection() {
   document.querySelectorAll(".job-cb").forEach(cb => cb.checked = false);
   document.getElementById("selectAll").checked = false;
   document.getElementById("fab").classList.remove("visible");
 }
 
-async function deleteSelected(){
+// Extract filename from Supabase public URL for storage cleanup
+function getStoragePathFromUrl(fileUrl) {
+  if (!fileUrl) return null;
+  try {
+    const match = fileUrl.match(/\/print-files\/(.+)$/);
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function deleteSelected() {
   const checked = getChecked();
-  if(!checked.length) return;
-  if(!confirm("Delete " + checked.length + " job(s)? This cannot be undone.")) return;
+  if (!checked.length) return;
+  if (!confirm("Delete " + checked.length + " job(s)? This will permanently remove both database records and PDF files from storage.")) return;
+
   const ids = Array.from(checked).map(cb => cb.dataset.id);
-  const { error } = await client.from("print_jobs").delete().in("id", ids);
-  if(error){ alert("Delete failed: " + error.message); return; }
+
+  // Extract storage file paths
+  const storagePaths = Array.from(checked)
+    .map(cb => getStoragePathFromUrl(cb.dataset.url))
+    .filter(Boolean);
+
+  // 1. Delete files from Supabase Storage
+  if (storagePaths.length > 0) {
+    const { error: storageError } = await client.storage
+      .from("print-files")
+      .remove(storagePaths);
+
+    if (storageError) {
+      console.warn("Storage cleanup warning:", storageError.message);
+    }
+  }
+
+  // 2. Delete database records
+  const { error: dbError } = await client
+    .from("print_jobs")
+    .delete()
+    .in("id", ids);
+
+  if (dbError) {
+    alert("Delete failed: " + dbError.message);
+    return;
+  }
+
   clearSelection();
   loadJobs();
 }
 
-async function markDone(id){
+async function markDone(id) {
   const { error } = await client.from("print_jobs").update({ status: "printed" }).eq("id", id);
-  if(error){ alert("Error: " + error.message); return; }
+  if (error) { alert("Error: " + error.message); return; }
   loadJobs();
 }
 
-async function printJob(id, url){
+async function printJob(id, url) {
   const { error } = await client.from("print_jobs").update({ status: "printing" }).eq("id", id);
-  if(error){ alert("Could not update status: " + error.message); return; }
+  if (error) { alert("Could not update status: " + error.message); return; }
   loadJobs();
   const win = window.open(url, "_blank");
-  if(!win){ alert("Please allow popups to print."); return; }
+  if (!win) { alert("Please allow popups to print."); return; }
   win.onload = () => setTimeout(() => win.print(), 600);
 }
 
-async function loadJobs(){
+async function loadJobs() {
   const selected = new Set(Array.from(document.querySelectorAll(".job-cb:checked")).map(cb => cb.dataset.id));
   let q = client.from("print_jobs").select("*").order("created_at", { ascending: false });
 
-  if(currentFilter !== "all"){
-    if(["pending", "printing", "printed"].includes(currentFilter)) q = q.eq("status", currentFilter);
-    else if(["bw", "color"].includes(currentFilter)) q = q.eq("print_type", currentFilter);
+  if (currentFilter !== "all") {
+    if (["pending", "printing", "printed"].includes(currentFilter)) q = q.eq("status", currentFilter);
+    else if (["bw", "color"].includes(currentFilter)) q = q.eq("print_type", currentFilter);
   }
 
   const { data, error } = await q;
   const c = document.getElementById("jobs");
 
-  if(error){
+  if (error) {
     c.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><p>' + esc(error.message) + '</p></div>';
     return;
   }
 
-  document.getElementById("count").textContent = (data?.length || 0) + " job(s)";
+  // Apply Date Range and Search Filter locally
+  const filteredData = (data || []).filter(job => {
+    // Check Date Range
+    if (!matchesDateRange(job.created_at, currentDateFilter)) return false;
 
-  if(!data?.length){
-    c.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>No print jobs yet.</p></div>';
+    // Check Search Query
+    if (searchQuery) {
+      const name = (job.customer_name || "").toLowerCase();
+      const file = (job.file_name || "").toLowerCase();
+      if (!name.includes(searchQuery) && !file.includes(searchQuery)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  document.getElementById("count").textContent = filteredData.length + " job(s)";
+
+  if (!filteredData.length) {
+    c.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>' + (searchQuery || currentDateFilter !== 'all' ? 'No matching print jobs found.' : 'No print jobs yet.') + '</p></div>';
     return;
   }
 
-  c.innerHTML = data.map(job => {
+  c.innerHTML = filteredData.map(job => {
     const s = job.status || "pending",
           printed = s === "printed",
           printing = s === "printing",
@@ -158,7 +370,7 @@ async function loadJobs(){
           label = printed ? "✅ Printed" : printing ? "🖨️ Printing" : "⏳ Pending";
 
     return `<div class="job ${cls}" id="job-${esc(job.id)}">
-      <input class="cb job-cb" type="checkbox" data-id="${esc(job.id)}" onchange="syncFab()">
+      <input class="cb job-cb" type="checkbox" data-id="${esc(job.id)}" data-url="${esc(job.file_url)}" onchange="syncFab()">
       <div class="icon">${icon}</div>
       <div class="details">
         <div class="customer">👤 ${esc(customer)}</div>
@@ -178,9 +390,9 @@ async function loadJobs(){
     </div>`;
   }).join("");
 
-  if(selected.size){
+  if (selected.size) {
     document.querySelectorAll(".job-cb").forEach(cb => {
-      if(selected.has(cb.dataset.id)) cb.checked = true;
+      if (selected.has(cb.dataset.id)) cb.checked = true;
     });
     syncFab();
   }
