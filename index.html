@@ -105,6 +105,24 @@
 .history-file-link:hover {
   text-decoration: underline;
 }
+    .history-toggle-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  background: transparent;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .15s;
+}
+.history-toggle-btn:hover {
+  background: var(--soft);
+  color: var(--ink);
+}
+
     .modal-actions { display:flex; gap:8px; margin-top:12px; } .modal-actions button { flex:1; min-height:42px; border-radius:10px; border:1px solid var(--line); font-weight:700; cursor:pointer; background:#fff; } .modal-actions .save { background:var(--ink); color:#fff; border-color:var(--ink); }
     @media (min-width:600px) { body { padding:28px 20px; } .card { padding:28px; } }
     @media (max-width:380px) { body { padding:10px; } .card { padding:16px; border-radius:17px; } .brand { margin-bottom:17px; } .profile-chip { font-size:11px; padding:6px 8px; } }
@@ -183,6 +201,9 @@
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
 
+let historyExpanded = false;
+let cachedHistoryJobs = [];
+  
 const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_muM1Xml6MpBwct6-kpvZXg_ejuz9Z8V";
 const BW_PRICE = 2, COLOR_PRICE = 5;
@@ -311,11 +332,19 @@ function updatePrintStatus(status, fileName, updatedAt) {
 }
 
 function renderHistory(jobs) {
+function toggleHistoryExpand() {
+  historyExpanded = !historyExpanded;
+  renderHistory(cachedHistoryJobs);
+}
+
+function renderHistory(jobs) {
+  cachedHistoryJobs = jobs || [];
+
   const historyBox = document.getElementById("printHistory");
   const historyList = document.getElementById("historyList");
   const historyCount = document.getElementById("historyCount");
 
-  const historyJobs = (jobs || []).filter(job => job.id !== currentJobId);
+  const historyJobs = cachedHistoryJobs.filter(job => job.id !== currentJobId);
 
   if (!historyJobs.length) {
     historyBox.classList.remove("show");
@@ -327,7 +356,11 @@ function renderHistory(jobs) {
   historyBox.classList.add("show");
   historyCount.textContent = historyJobs.length + (historyJobs.length === 1 ? " print" : " prints");
 
-  historyList.innerHTML = historyJobs.map(job => {
+  // Show top 3 by default
+  const LIMIT = 3;
+  const displayJobs = historyExpanded ? historyJobs : historyJobs.slice(0, LIMIT);
+
+  historyList.innerHTML = displayJobs.map(job => {
     const status = normalizeStatus(job.status);
     const info = getStatusInfo(status);
     const printType = job.print_type === "color" ? "Color" : "B&W";
@@ -355,8 +388,26 @@ function renderHistory(jobs) {
       </div>
     `;
   }).join("");
-}
 
+  // Handle See all / Show less button
+  let toggleBtn = document.getElementById("historyToggleBtn");
+  if (historyJobs.length > LIMIT) {
+    if (!toggleBtn) {
+      toggleBtn = document.createElement("button");
+      toggleBtn.id = "historyToggleBtn";
+      toggleBtn.className = "history-toggle-btn";
+      toggleBtn.type = "button";
+      toggleBtn.onclick = toggleHistoryExpand;
+      historyBox.appendChild(toggleBtn);
+    }
+    toggleBtn.style.display = "block";
+    toggleBtn.textContent = historyExpanded 
+      ? "Show less ↑" 
+      : `See all (${historyJobs.length}) ↓`;
+  } else if (toggleBtn) {
+    toggleBtn.style.display = "none";
+  }
+}
 
 async function loadPrintHistory() {
   const { data, error } = await client
