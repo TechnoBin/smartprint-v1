@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0f172a"><title>SmartPrint Dashboard</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:#f1f5f9;min-height:100vh;color:#0f172a;padding:18px 12px 100px}.wrap{max-width:920px;margin:auto}.header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.header h1{font-size:22px;letter-spacing:-.3px}.header p{font-size:12px;color:#94a3b8;margin-top:3px}.count{background:#0f172a;color:#fff;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;white-space:nowrap}.filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}.filters::-webkit-scrollbar{display:none}.filter{flex:0 0 auto;padding:8px 13px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer}.filter.active{background:#0f172a;color:#fff;border-color:#0f172a}.jobs{display:flex;flex-direction:column;gap:10px}.job{background:#fff;border-radius:15px;padding:14px;border-left:4px solid #e2e8f0;box-shadow:0 2px 7px rgba(15,23,42,.05);display:grid;grid-template-columns:auto 44px minmax(0,1fr) auto;gap:12px;align-items:center}.job.is-pending{border-left-color:#f59e0b}.job.is-printing{border-left-color:#3b82f6}.job.is-printed{border-left-color:#22c55e}.cb{width:18px;height:18px;accent-color:#2563eb}.icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#eff6ff;font-size:21px}.is-printing .icon{background:#eff6ff}.is-printed .icon{background:#f0fdf4}.details{min-width:0}.customer{font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.filename{font-size:12px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.pill{font-size:10px;font-weight:750;padding:4px 8px;border-radius:999px;background:#f1f5f9;color:#475569}.pending{background:#fff7ed;color:#c2410c}.printing{background:#eff6ff;color:#1d4ed8}.printed{background:#dcfce7;color:#15803d}.price{background:#f5f3ff;color:#6d28d9}.time{color:#94a3b8;background:transparent;font-weight:500}.actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.btn{border:0;border-radius:9px;padding:8px 11px;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}.view{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}.print{background:#2563eb;color:#fff}.done{background:#16a34a;color:#fff}.btn:disabled{opacity:.55;cursor:not-allowed}.empty{text-align:center;background:#fff;border-radius:15px;padding:60px 20px;color:#94a3b8}.empty-icon{font-size:42px;margin-bottom:10px}.fab{position:fixed;left:50%;bottom:16px;transform:translate(-50%,130px);background:#0f172a;color:#fff;border-radius:16px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(15,23,42,.25);transition:.25s;z-index:5}.fab.visible{transform:translate(-50%,0)}.fab button{border:0;border-radius:9px;padding:8px 12px;font-weight:800;cursor:pointer}.delete{background:#ef4444;color:#fff}.cancel{background:transparent;color:#cbd5e1}.selectall{font-size:11px;color:#cbd5e1;display:flex;gap:6px;align-items:center;white-space:nowrap}.refreshing{opacity:.65}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:#f1f5f9;min-height:100vh;color:#0f172a;padding:18px 12px 100px}.wrap{max-width:920px;margin:auto}.header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.header h1{font-size:22px;letter-spacing:-.3px}.header p{font-size:12px;color:#94a3b8;margin-top:3px}.count{background:#0f172a;color:#fff;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;white-space:nowrap}.filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}.filters::-webkit-scrollbar{display:none}.filter{flex:0 0 auto;padding:8px 13px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer}.filter.active{background:#0f172a;color:#fff;border-color:#0f172a}.jobs{display:flex;flex-direction:column;gap:10px}.job{background:#fff;border-radius:15px;padding:14px;border-left:4px solid #e2e8f0;box-shadow:0 2px 7px rgba(15,23,42,.05);display:grid;grid-template-columns:auto 44px minmax(0,1fr) auto;gap:12px;align-items:center}.job.is-pending{border-left-color:#f59e0b}.job.is-printing{border-left-color:#3b82f6}.job.is-printed{border-left-color:#22c55e}.cb{width:18px;height:18px;accent-color:#2563eb}.icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#eff6ff;font-size:21px}.is-printing .icon{background:#eff6ff}.is-printed .icon{background:#f0fdf4}.details{min-width:0}.customer{font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.filename{font-size:12px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.pill{font-size:10px;font-weight:750;padding:4px 8px;border-radius:999px;background:#f1f5f9;color:#475569}.pending{background:#fff7ed;color:#c2410c}.printing{background:#eff6ff;color:#1d4ed8}.printed{background:#dcfce7;color:#15803d}.price{background:#f5f3ff;color:#6d28d9}.time{color:#94a3b8;background:transparent;font-weight:500}.actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.btn{border:0;border-radius:99px;padding:8px 11px;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}.view{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}.print{background:#2563eb;color:#fff}.done{background:#16a34a;color:#fff}.btn:disabled{opacity:.55;cursor:not-allowed}.empty{text-align:center;background:#fff;border-radius:15px;padding:60px 20px;color:#94a3b8}.empty-icon{font-size:42px;margin-bottom:10px}.fab{position:fixed;left:50%;bottom:16px;transform:translate(-50%,130px);background:#0f172a;color:#fff;border-radius:16px;padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(15,23,42,.25);transition:.25s;z-index:5}.fab.visible{transform:translate(-50%,0)}.fab button{border:0;border-radius:9px;padding:8px 12px;font-weight:800;cursor:pointer}.delete{background:#ef4444;color:#fff}.cancel{background:transparent;color:#cbd5e1}.selectall{font-size:11px;color:#cbd5e1;display:flex;gap:6px;align-items:center;white-space:nowrap}.refreshing{opacity:.65}
 @media(max-width:680px){body{padding:12px 10px 90px}.header h1{font-size:19px}.job{grid-template-columns:auto 40px minmax(0,1fr);padding:12px;gap:9px}.icon{width:40px;height:40px}.actions{grid-column:2 / -1;justify-content:stretch}.actions .btn{flex:1;min-height:40px}.job-customer{font-size:13px}.fab{width:calc(100% - 20px);justify-content:center}.fab .divider{display:none}.fab-count{font-size:12px}}
 </style>
 </head>
@@ -14,9 +14,9 @@
 <div id="jobs" class="jobs"><div class="empty"><div class="empty-icon">⏳</div><p>Loading jobs...</p></div></div>
 </div>
 <div class="fab" id="fab"><span id="fabCount">0 selected</span><label class="selectall"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"> Select all</label><button class="delete" onclick="deleteSelected()">🗑️ Delete</button><button class="cancel" onclick="clearSelection()">Cancel</button></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
-const SUPABASE_URL="https://hommwwdjqzkcoxheerxl.supabase.co";
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_muM1Xml6MpBwct6-kpvZXg_ejuz9Z8V";
 
 const client = window.supabase.createClient(
@@ -24,16 +24,170 @@ const client = window.supabase.createClient(
     SUPABASE_PUBLISHABLE_KEY
 );
   
-let currentFilter="all";
-function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-function formatTime(d){const date=new Date(d),now=new Date(),mins=Math.max(0,Math.floor((now-date)/60000));const ago=mins<1?"just now":mins<60?mins+"m ago":mins<1440?Math.floor(mins/60)+"h ago":Math.floor(mins/1440)+"d ago";const t=date.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});const ds=date.toLocaleDateString([], {day:"numeric",month:"short"});return(now.toDateString()===date.toDateString()?t:ds+" "+t)+" · "+ago;}
-function setFilter(type){currentFilter=type;document.querySelectorAll(".filter").forEach(b=>b.classList.remove("active"));document.getElementById("filter-"+type).classList.add("active");clearSelection();loadJobs();}
-function getChecked(){return document.querySelectorAll(".job-cb:checked");}function syncFab(){const c=getChecked().length;document.getElementById("fab").classList.toggle("visible",c>0);document.getElementById("fabCount").textContent=c+" selected";const all=document.querySelectorAll(".job-cb");const sa=document.getElementById("selectAll");sa.checked=all.length>0&&c===all.length;sa.indeterminate=c>0&&c<all.length;document.querySelectorAll(".job").forEach(card=>{const cb=card.querySelector(".job-cb");card.classList.toggle("selected",cb&&cb.checked);});}
-function toggleSelectAll(){const v=document.getElementById("selectAll").checked;document.querySelectorAll(".job-cb").forEach(cb=>cb.checked=v);syncFab();}function clearSelection(){document.querySelectorAll(".job-cb").forEach(cb=>cb.checked=false);document.getElementById("selectAll").checked=false;document.getElementById("fab").classList.remove("visible");}
-async function deleteSelected(){const checked=getChecked();if(!checked.length)return;if(!confirm("Delete "+checked.length+" job(s)? This cannot be undone."))return;const ids=Array.from(checked).map(cb=>cb.dataset.id);const{error}=await client.from("print_jobs").delete().in("id",ids);if(error){alert("Delete failed: "+error.message);return;}clearSelection();loadJobs();}
-async function markDone(id){const{error}=await client.from("print_jobs").update({status:"printed"}).eq("id",id);if(error){alert("Error: "+error.message);return;}loadJobs();}
-async function printJob(id,url){const{error}=await client.from("print_jobs").update({status:"printing"}).eq("id",id);if(error){alert("Could not update status: "+error.message);return;}loadJobs();const win=window.open(url,"_blank");if(!win){alert("Please allow popups to print.");return;}win.onload=()=>setTimeout(()=>win.print(),600);}
-async function loadJobs(){const selected=new Set(Array.from(document.querySelectorAll(".job-cb:checked")).map(cb=>cb.dataset.id));let q=client.from("print_jobs").select("*").order("created_at",{ascending:false});if(currentFilter!=="all"){if(["pending","printing","printed"].includes(currentFilter))q=q.eq("status",currentFilter);else if(["bw","color"].includes(currentFilter))q=q.eq("print_type",currentFilter);}const{data,error}=await q;const c=document.getElementById("jobs");if(error){c.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><p>'+esc(error.message)+'</p></div>';return;}document.getElementById("count").textContent=(data?.length||0)+" job(s)";if(!data?.length){c.innerHTML='<div class="empty"><div class="empty-icon">📭</div><p>No print jobs yet.</p></div>';return;}c.innerHTML=data.map(job=>{const s=job.status||"pending",printed=s==="printed",printing=s==="printing",type=job.print_type==="color"?"Color":"B&W",customer=job.customer_name||"Unknown",pages=job.pages?job.pages+" pg":"",price=job.price?"Rs."+job.price:"",cls=printed?"is-printed":printing?"is-printing":"is-pending",icon=printed?"✅":printing?"🖨️":"📄",pill=printed?"printed":printing?"printing":"pending",label=printed?"✅ Printed":printing?"🖨️ Printing":"⏳ Pending";return `<div class="job ${cls}" id="job-${esc(job.id)}"><input class="cb job-cb" type="checkbox" data-id="${esc(job.id)}" onchange="syncFab()"><div class="icon">${icon}</div><div class="details"><div class="customer">👤 ${esc(customer)}</div><div class="filename">📎 ${esc(job.file_name)}</div><div class="meta"><span class="pill ${pill}">${label}</span>${pages?`<span class="pill">${esc(pages)}</span>`:""}<span class="pill">${type}</span>${price?`<span class="pill price">${esc(price)}</span>`:""}${job.created_at?`<span class="pill time">${formatTime(job.created_at)}</span>`:""}</div></div><div class="actions"><a class="btn view" href="${esc(job.file_url)}" target="_blank" rel="noopener">View</a>${!printed?`<button class="btn print" onclick="printJob('${esc(job.id)}','${esc(job.file_url)}')">🖨️ Print</button><button class="btn done" onclick="markDone('${esc(job.id)}')">✔ Done</button>`:""}</div></div>`;}).join("");if(selected.size){document.querySelectorAll(".job-cb").forEach(cb=>{if(selected.has(cb.dataset.id))cb.checked=true;});syncFab();}}
-loadJobs();setInterval(loadJobs,5000);
+let currentFilter = "all";
+
+function esc(v){
+  return String(v??"").replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+}
+
+// Helper to safely parse UTC strings from Supabase into local Date objects
+function parseDate(dateValue) {
+  if (!dateValue) return null;
+  if (dateValue instanceof Date) return dateValue;
+
+  let str = String(dateValue).trim().replace(" ", "T");
+
+  if (!str.endsWith("Z") && !/[+-]\d{2}:?\d{2}$/.test(str)) {
+    str += "Z";
+  }
+
+  const date = new Date(str);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatTime(d) {
+  const date = parseDate(d);
+  if (!date) return "";
+
+  const now = new Date();
+  const mins = Math.max(0, Math.floor((now - date) / 60000));
+  const ago = mins < 1 ? "just now" : mins < 60 ? mins + "m ago" : mins < 1440 ? Math.floor(mins / 60) + "h ago" : Math.floor(mins / 1440) + "d ago";
+  const t = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+  const ds = date.toLocaleDateString([], { day: "numeric", month: "short" });
+
+  return (now.toDateString() === date.toDateString() ? t : ds + " " + t) + " · " + ago;
+}
+
+function setFilter(type){
+  currentFilter = type;
+  document.querySelectorAll(".filter").forEach(b => b.classList.remove("active"));
+  document.getElementById("filter-" + type).classList.add("active");
+  clearSelection();
+  loadJobs();
+}
+
+function getChecked(){ return document.querySelectorAll(".job-cb:checked"); }
+
+function syncFab(){
+  const c = getChecked().length;
+  document.getElementById("fab").classList.toggle("visible", c > 0);
+  document.getElementById("fabCount").textContent = c + " selected";
+  const all = document.querySelectorAll(".job-cb");
+  const sa = document.getElementById("selectAll");
+  sa.checked = all.length > 0 && c === all.length;
+  sa.indeterminate = c > 0 && c < all.length;
+  document.querySelectorAll(".job").forEach(card => {
+    const cb = card.querySelector(".job-cb");
+    card.classList.toggle("selected", cb && cb.checked);
+  });
+}
+
+function toggleSelectAll(){
+  const v = document.getElementById("selectAll").checked;
+  document.querySelectorAll(".job-cb").forEach(cb => cb.checked = v);
+  syncFab();
+}
+
+function clearSelection(){
+  document.querySelectorAll(".job-cb").forEach(cb => cb.checked = false);
+  document.getElementById("selectAll").checked = false;
+  document.getElementById("fab").classList.remove("visible");
+}
+
+async function deleteSelected(){
+  const checked = getChecked();
+  if(!checked.length) return;
+  if(!confirm("Delete " + checked.length + " job(s)? This cannot be undone.")) return;
+  const ids = Array.from(checked).map(cb => cb.dataset.id);
+  const { error } = await client.from("print_jobs").delete().in("id", ids);
+  if(error){ alert("Delete failed: " + error.message); return; }
+  clearSelection();
+  loadJobs();
+}
+
+async function markDone(id){
+  const { error } = await client.from("print_jobs").update({ status: "printed" }).eq("id", id);
+  if(error){ alert("Error: " + error.message); return; }
+  loadJobs();
+}
+
+async function printJob(id, url){
+  const { error } = await client.from("print_jobs").update({ status: "printing" }).eq("id", id);
+  if(error){ alert("Could not update status: " + error.message); return; }
+  loadJobs();
+  const win = window.open(url, "_blank");
+  if(!win){ alert("Please allow popups to print."); return; }
+  win.onload = () => setTimeout(() => win.print(), 600);
+}
+
+async function loadJobs(){
+  const selected = new Set(Array.from(document.querySelectorAll(".job-cb:checked")).map(cb => cb.dataset.id));
+  let q = client.from("print_jobs").select("*").order("created_at", { ascending: false });
+
+  if(currentFilter !== "all"){
+    if(["pending", "printing", "printed"].includes(currentFilter)) q = q.eq("status", currentFilter);
+    else if(["bw", "color"].includes(currentFilter)) q = q.eq("print_type", currentFilter);
+  }
+
+  const { data, error } = await q;
+  const c = document.getElementById("jobs");
+
+  if(error){
+    c.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><p>' + esc(error.message) + '</p></div>';
+    return;
+  }
+
+  document.getElementById("count").textContent = (data?.length || 0) + " job(s)";
+
+  if(!data?.length){
+    c.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>No print jobs yet.</p></div>';
+    return;
+  }
+
+  c.innerHTML = data.map(job => {
+    const s = job.status || "pending",
+          printed = s === "printed",
+          printing = s === "printing",
+          type = job.print_type === "color" ? "Color" : "B&W",
+          customer = job.customer_name || "Unknown",
+          pages = job.pages ? job.pages + " pg" : "",
+          price = job.price ? "Rs." + job.price : "",
+          cls = printed ? "is-printed" : printing ? "is-printing" : "is-pending",
+          icon = printed ? "✅" : printing ? "🖨️" : "📄",
+          pill = printed ? "printed" : printing ? "printing" : "pending",
+          label = printed ? "✅ Printed" : printing ? "🖨️ Printing" : "⏳ Pending";
+
+    return `<div class="job ${cls}" id="job-${esc(job.id)}">
+      <input class="cb job-cb" type="checkbox" data-id="${esc(job.id)}" onchange="syncFab()">
+      <div class="icon">${icon}</div>
+      <div class="details">
+        <div class="customer">👤 ${esc(customer)}</div>
+        <div class="filename">📎 ${esc(job.file_name)}</div>
+        <div class="meta">
+          <span class="pill ${pill}">${label}</span>
+          ${pages ? `<span class="pill">${esc(pages)}</span>` : ""}
+          <span class="pill">${type}</span>
+          ${price ? `<span class="pill price">${esc(price)}</span>` : ""}
+          ${job.created_at ? `<span class="pill time">${formatTime(job.created_at)}</span>` : ""}
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn view" href="${esc(job.file_url)}" target="_blank" rel="noopener">View</a>
+        ${!printed ? `<button class="btn print" onclick="printJob('${esc(job.id)}','${esc(job.file_url)}')">🖨️ Print</button><button class="btn done" onclick="markDone('${esc(job.id)}')">✔ Done</button>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+
+  if(selected.size){
+    document.querySelectorAll(".job-cb").forEach(cb => {
+      if(selected.has(cb.dataset.id)) cb.checked = true;
+    });
+    syncFab();
+  }
+}
+
+loadJobs();
+setInterval(loadJobs, 5000);
 </script>
-</body></html>
+</body>
+</html>
