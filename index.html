@@ -534,8 +534,7 @@ async function loadPrintHistory() {
       pages,
       print_type,
       price,
-      created_at,
-      updated_at
+      created_at
     `)
     .eq("device_id", deviceId)
     .order("created_at", { ascending: false });
@@ -545,11 +544,7 @@ async function loadPrintHistory() {
     return [];
   }
 
-  const jobs = data || [];
-
-  renderHistory(jobs);
-
-  return jobs;
+  return data || [];
 }
 async function checkPrintStatus() {
   if (!currentJobId) return;
@@ -559,7 +554,15 @@ async function checkPrintStatus() {
     error
   } = await client
     .from("print_jobs")
-    .select("id,status,file_name,updated_at,created_at,pages,print_type")
+    .select(`
+      id,
+      status,
+      file_name,
+      created_at,
+      pages,
+      print_type,
+      price
+    `)
     .eq("id", currentJobId)
     .eq("device_id", deviceId)
     .maybeSingle();
@@ -579,18 +582,20 @@ async function checkPrintStatus() {
   updatePrintStatus(
     status,
     data.file_name,
-    data.updated_at || data.created_at
+    data.created_at
   );
 
-  // Refresh history so the status changes immediately
-  // in the history list too.
-  await loadPrintHistory();
+  // Reload all jobs so history always reflects
+  // the latest status from Supabase.
+  const jobs = await loadPrintHistory();
+
+  renderHistory(jobs);
 
   if (status === "printed" || status === "failed") {
     stopPolling();
   }
 }
-
+  
 function startPolling() {
   stopPolling();
 
@@ -610,27 +615,31 @@ function stopPolling() {
 
 async function restorePrintState() {
   /*
-    Important:
-    We DON'T restore a single job from localStorage anymore.
-
-    Supabase contains the complete history.
+    Supabase contains the complete print history
+    for this device.
   */
 
   const jobs = await loadPrintHistory();
 
   if (!jobs.length) {
-    document.getElementById("printStatus").className = "print-status";
+    currentJobId = null;
+
+    document.getElementById("printStatus").className =
+      "print-status";
+
     document.getElementById("secondaryActions")
       .classList.remove("show");
+
+    renderHistory([]);
 
     return;
   }
 
   /*
     Find the newest unfinished job.
-
-    That becomes the active status.
+    That becomes the CURRENT PRINT.
   */
+
   const activeJob = jobs.find(job => {
     const status = normalizeStatus(job.status);
 
@@ -645,14 +654,46 @@ async function restorePrintState() {
     updatePrintStatus(
       normalizeStatus(activeJob.status),
       activeJob.file_name,
-      activeJob.updated_at || activeJob.created_at
+      activeJob.created_at
     );
+
+    /*
+      IMPORTANT:
+      Render history AFTER currentJobId is known.
+      Therefore the current job is excluded.
+    */
+    renderHistory(jobs);
 
     startPolling();
 
     return;
   }
 
+  /*
+    No pending/printing job exists.
+
+    Show the newest job as CURRENT PRINT.
+  */
+
+  const latestJob = jobs[0];
+
+  currentJobId = latestJob.id;
+
+  localStorage.setItem(JOB_KEY, currentJobId);
+
+  updatePrintStatus(
+    normalizeStatus(latestJob.status),
+    latestJob.file_name,
+    latestJob.created_at
+  );
+
+  /*
+    Again, render AFTER currentJobId is set.
+  */
+  renderHistory(jobs);
+
+  stopPolling();
+}
   /*
     No pending/printing job exists.
 
@@ -767,8 +808,11 @@ async function restorePrintState() {
 
     resetFileUI();
 
-    // Update history after successful upload
-    await loadPrintHistory();
+// Refresh history after the new job is created.
+// Because currentJobId is already set,
+// the new/current job will NOT appear in history.
+const jobs = await loadPrintHistory();
+renderHistory(jobs);
 
     startPolling();
 
