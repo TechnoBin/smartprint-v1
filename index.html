@@ -292,21 +292,52 @@ function getStatusInfo(status) {
   return map[status] || { icon: "⏳", title: "Checking status", text: "Checking your print job..." };
 }
 
+// Helper function to reliably parse Supabase UTC strings into local Date objects
+function parseDate(dateValue) {
+  if (!dateValue) return null;
+  if (dateValue instanceof Date) return dateValue;
+
+  let str = String(dateValue).trim().replace(" ", "T");
+
+  // If the string lacks a timezone offset or 'Z', append 'Z' so JS treats it as UTC
+  if (!str.endsWith("Z") && !/[+-]\d{2}:?\d{2}$/.test(str)) {
+    str += "Z";
+  }
+
+  const date = new Date(str);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 function formatTime(dateValue) {
-  if (!dateValue) return "";
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const date = parseDate(dateValue);
+  if (!date) return "";
+
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  });
 }
 
 function formatDate(dateValue) {
-  if (!dateValue) return "";
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return "";
+  const date = parseDate(dateValue);
+  if (!date) return "";
+
   const today = new Date();
-  if (date.toDateString() === today.toDateString()) return formatTime(dateValue);
-  return date.toLocaleDateString([], { day: "numeric", month: "short" }) + " · " + formatTime(dateValue);
+  if (date.toDateString() === today.toDateString()) {
+    return formatTime(date);
+  }
+
+  return (
+    date.toLocaleDateString([], {
+      day: "numeric",
+      month: "short"
+    }) +
+    " · " +
+    formatTime(date)
+  );
 }
+
 
 function escapeHtml(value) {
   return String(value || "")
