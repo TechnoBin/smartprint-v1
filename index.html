@@ -91,6 +91,20 @@
     .modal { width:min(100%,420px); background:#fff; border-radius:18px; padding:18px; box-shadow:0 20px 50px rgba(15,23,42,.22); }
     .modal h3 { font-size:17px; margin-bottom:5px; } .modal p { font-size:12px; color:#64748b; margin-bottom:13px; }
     .modal input { width:100%; padding:12px; border:1px solid var(--line); border-radius:10px; font:inherit; outline:none; }
+    .history-file-link {
+  font-size: 13px;
+  font-weight: 750;
+  color: var(--blue);
+  text-decoration: none;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.history-file-link:hover {
+  text-decoration: underline;
+}
     .modal-actions { display:flex; gap:8px; margin-top:12px; } .modal-actions button { flex:1; min-height:42px; border-radius:10px; border:1px solid var(--line); font-weight:700; cursor:pointer; background:#fff; } .modal-actions .save { background:var(--ink); color:#fff; border-color:var(--ink); }
     @media (min-width:600px) { body { padding:28px 20px; } .card { padding:28px; } }
     @media (max-width:380px) { body { padding:10px; } .card { padding:16px; border-radius:17px; } .brand { margin-bottom:17px; } .profile-chip { font-size:11px; padding:6px 8px; } }
@@ -298,6 +312,7 @@ function updatePrintStatus(status, fileName, updatedAt) {
 }
 
 function renderHistory(jobs) {
+function renderHistory(jobs) {
   const historyBox = document.getElementById("printHistory");
   const historyList = document.getElementById("historyList");
   const historyCount = document.getElementById("historyCount");
@@ -320,11 +335,15 @@ function renderHistory(jobs) {
     const printType = job.print_type === "color" ? "Color" : "B&W";
     const price = job.price !== null && job.price !== undefined ? `₹${job.price}` : "";
 
+    const fileLink = job.file_url 
+      ? `<a href="${escapeHtml(job.file_url)}" target="_blank" rel="noopener noreferrer" class="history-file-link" title="Open PDF">${escapeHtml(job.file_name || "Untitled PDF")} ↗</a>`
+      : `<div class="history-file" title="${escapeHtml(job.file_name)}">${escapeHtml(job.file_name || "Untitled PDF")}</div>`;
+
     return `
       <div class="history-item">
         <div class="history-item-icon">${info.icon}</div>
         <div class="history-item-main">
-          <div class="history-file" title="${escapeHtml(job.file_name)}">${escapeHtml(job.file_name || "Untitled PDF")}</div>
+          ${fileLink}
           <div class="history-meta">
             <span>${formatDate(job.updated_at || job.created_at)}</span>
             ${job.pages ? `<span>·</span><span>${job.pages} page${job.pages === 1 ? "" : "s"}</span>` : ""}
@@ -340,10 +359,11 @@ function renderHistory(jobs) {
   }).join("");
 }
 
+
 async function loadPrintHistory() {
   const { data, error } = await client
     .from("print_jobs")
-    .select(`id, status, file_name, pages, print_type, price, created_at`)
+    .select(`id, status, file_name, file_url, pages, print_type, price, created_at`)
     .eq("device_id", deviceId)
     .order("created_at", { ascending: false });
 
