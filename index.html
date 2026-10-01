@@ -443,7 +443,10 @@ function renderHistory(jobs) {
   const historyList = document.getElementById("historyList");
   const historyCount = document.getElementById("historyCount");
 
-  if (!jobs || !jobs.length) {
+  // Never show the currently active job inside history.
+  const historyJobs = (jobs || []).filter(job => job.id !== currentJobId);
+
+  if (!historyJobs.length) {
     historyBox.classList.remove("show");
     historyList.innerHTML = "";
     historyCount.textContent = "";
@@ -453,40 +456,65 @@ function renderHistory(jobs) {
   historyBox.classList.add("show");
 
   historyCount.textContent =
-    jobs.length + (jobs.length === 1 ? " print" : " prints");
+    historyJobs.length +
+    (historyJobs.length === 1 ? " print" : " prints");
 
-  historyList.innerHTML = jobs.map(job => {
+  historyList.innerHTML = historyJobs.map(job => {
     const status = normalizeStatus(job.status);
     const info = getStatusInfo(status);
 
-    const isActive =
-      currentJobId &&
-      job.id === currentJobId &&
-      status !== "printed" &&
-      status !== "failed";
+    const printType =
+      job.print_type === "color" ? "Color" : "B&W";
+
+    const price =
+      job.price !== null && job.price !== undefined
+        ? `₹${job.price}`
+        : "";
 
     return `
-      <div class="history-item ${isActive ? "active" : ""}">
+      <div class="history-item">
         <div class="history-item-icon">
           ${info.icon}
         </div>
 
         <div class="history-item-main">
-          <div class="history-file" title="${escapeHtml(job.file_name)}">
+          <div
+            class="history-file"
+            title="${escapeHtml(job.file_name)}"
+          >
             ${escapeHtml(job.file_name || "Untitled PDF")}
           </div>
 
           <div class="history-meta">
             <span>${formatDate(job.updated_at || job.created_at)}</span>
-            ${job.pages ? `<span>·</span><span>${job.pages} page${job.pages === 1 ? "" : "s"}</span>` : ""}
+
+            ${
+              job.pages
+                ? `<span>·</span><span>${job.pages} page${job.pages === 1 ? "" : "s"}</span>`
+                : ""
+            }
+
+            <span>·</span>
+            <span>${printType}</span>
+
+            ${
+              price
+                ? `<span>·</span><span>${price}</span>`
+                : ""
+            }
           </div>
         </div>
 
         <div class="history-status ${status}">
-          ${status === "pending" ? "Pending" :
-            status === "printing" ? "Printing" :
-            status === "printed" ? "Printed" :
-            "Failed"}
+          ${
+            status === "pending"
+              ? "Pending"
+              : status === "printing"
+              ? "Printing"
+              : status === "printed"
+              ? "Printed"
+              : "Failed"
+          }
         </div>
       </div>
     `;
@@ -505,6 +533,7 @@ async function loadPrintHistory() {
       file_name,
       pages,
       print_type,
+      price,
       created_at,
       updated_at
     `)
@@ -522,7 +551,6 @@ async function loadPrintHistory() {
 
   return jobs;
 }
-
 async function checkPrintStatus() {
   if (!currentJobId) return;
 
