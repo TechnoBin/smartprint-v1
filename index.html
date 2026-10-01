@@ -288,7 +288,48 @@ function saveName(){ const name=document.getElementById("nameEditor").value.trim
 function checkReady(){ const name=document.getElementById("customerName").value.trim(); const input=document.getElementById("customerName"); input.className=name?"filled":""; const ready=name && selectedFile && pageCount>0 && !readingPDF; document.getElementById("uploadBtn").disabled=!ready; if(ready) updateSummary(); }
 function updateSummary(){ const name=document.getElementById("customerName").value.trim(); if(!selectedFile||!pageCount||!name)return; const p=printType==="color"?COLOR_PRICE:BW_PRICE, total=pageCount*p, kb=Math.round(selectedFile.size/1024); const size=kb>1024?(kb/1024).toFixed(1)+" MB":kb+" KB"; document.getElementById("s-customer").textContent=name; document.getElementById("s-file").textContent=selectedFile.name+" ("+size+")"; document.getElementById("s-pages").textContent=pageCount; document.getElementById("s-type").textContent=printType==="color"?"Color":"Black & White"; document.getElementById("s-ppp").textContent="Rs."+p; document.getElementById("s-total").textContent="Rs."+total; document.getElementById("summary").style.display="block"; }
 function onTypeChange(){ printType=document.querySelector('input[name="type"]:checked').value; if(pageCount)updateSummary(); }
-async function onFileSelect(){ const file=document.getElementById("fileInput").files[0]; selectedFile=file||null; pageCount=0; readingPDF=false; if(!file){ resetFileUI(); checkReady(); return; } if(file.type!=="application/pdf"&&!file.name.toLowerCase().endsWith(".pdf")){ setStatus("Please choose a PDF file.","error"); resetFileUI(); return; } if(file.size>MAX_FILE_SIZE){ setStatus("PDF is too large. Maximum size is 25 MB.","error"); resetFileUI(); return; } readingPDF=true; document.getElementById("uploadArea").className="upload-area loading"; document.getElementById("uploadIcon").textContent="⏳"; document.getElementById("uploadText").textContent="Reading PDF..."; document.getElementById("uploadHint").textContent="Calculating pages & cost"; document.getElementById("summary").style.display="none"; checkReady(); try { const buf=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data:buf}).promise; pageCount=pdf.numPages; if(!pageCount)throw new Error("No pages found"); } catch(e){ pageCount=0; readingPDF=false; setStatus("Could not read this PDF. Please choose a valid PDF.","error"); resetFileUI(false); return; } readingPDF=false; document.getElementById("uploadArea").className="upload-area has-file"; document.getElementById("uploadIcon").textContent="✅"; document.getElementById("uploadText").textContent=file.name; document.getElementById("uploadHint").textContent=pageCount+" page"+(pageCount!==1?"s":"")+" detected"; setStatus(""," "); checkReady(); }
+async function onFileSelect() {
+  const file = document.getElementById("fileInput").files[0];
+  selectedFile = file || null;
+  pageCount = 0;
+  readingPDF = false;
+
+  if (!file) {
+    resetFileUI();
+    checkReady();
+    return;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    setStatus("File is too large. Max size is 25MB.", "error");
+    resetFileUI();
+    checkReady();
+    return;
+  }
+
+  readingPDF = true;
+  document.getElementById("uploadArea").classList.add("loading");
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    pageCount = pdf.numPages;
+    
+    document.getElementById("uploadArea").classList.remove("loading");
+    document.getElementById("uploadArea").classList.add("has-file");
+    document.getElementById("uploadIcon").textContent = "✓";
+    document.getElementById("uploadText").textContent = file.name;
+    document.getElementById("uploadHint").textContent = `${pageCount} page${pageCount !== 1 ? "s" : ""}`;
+    
+    readingPDF = false;
+    checkReady();
+  } catch (err) {
+    console.error("PDF reading error:", err);
+    setStatus("Could not read PDF file. Please try another file.", "error");
+    resetFileUI();
+    readingPDF = false;
+  }
+}
 function resetFileUI(clearInput=true){ selectedFile=null; pageCount=0; readingPDF=false; if(clearInput)document.getElementById("fileInput").value=""; document.getElementById("uploadArea").className="upload-area"; document.getElementById("uploadIcon").textContent="📄"; document.getElementById("uploadText").textContent="Tap to choose a PDF"; document.getElementById("uploadHint").textContent="PDF files only"; document.getElementById("summary").style.display="none"; document.getElementById("uploadBtn").disabled=true; }
 function normalizeStatus(status) {
   // Support both "printed" and "done"
@@ -604,11 +645,20 @@ async function restorePrintState() {
 
   stopPolling();
 }
-  async function uploadFile() {
+ async function uploadFile() {
   const btn = document.getElementById("uploadBtn");
   const name = document.getElementById("customerName").value.trim();
 
-  if (!selectedFile || !name) return;
+  if (!selectedFile || !name) {
+    setStatus("Please select a file and enter your name.", "error");
+    return;
+  }
+
+  // Check if page count is valid
+  if (pageCount <= 0) {
+    setStatus("PDF page count is invalid. Please try uploading again.", "error");
+    return;
+  }
 
   localStorage.setItem(NAME_KEY, name);
 
@@ -625,31 +675,33 @@ async function restorePrintState() {
       "_" +
       selectedFile.name;
 
-    const { error: uploadError } =
-      await client.storage
-        .from("print-files")
-        .upload(fileName, selectedFile, {
-          contentType: "application/pdf",
-          upsert: false
-        });
+    // Upload file to Supabase Storage
+    const { error: uploadError } = await client.storage
+      .from("print-files")
+      .upload(fileName, selectedFile, {
+        contentType: "application/pdf",
+        upsert: false
+      });
 
     if (uploadError) {
       throw new Error("Upload failed: " + uploadError.message);
     }
 
-    const { data: urlData } =
-      client.storage
-        .from("print-files")
-        .getPublicUrl(fileName);
+    // Get public URL
+    const { data: urlData, error: urlError } = client.storage
+      .from("print-files")
+      .getPublicUrl(fileName);
+
+    if (urlError || !urlData?.publicUrl) {
+      throw new Error("Could not get file URL: " + (urlError?.message || "Unknown error"));
+    }
 
     const total =
       pageCount *
       (printType === "color" ? COLOR_PRICE : BW_PRICE);
 
-    const {
-      data: jobData,
-      error: dbError
-    } = await client
+    // Insert job record in database
+    const { data: jobData, error: dbError } = await client
       .from("print_jobs")
       .insert([{
         customer_name: name,
@@ -683,7 +735,6 @@ async function restorePrintState() {
     );
 
     btn.textContent = "Uploaded ✓";
-
     document.getElementById("summary").style.display = "none";
 
     resetFileUI();
@@ -694,7 +745,7 @@ async function restorePrintState() {
     startPolling();
 
   } catch (err) {
-    console.error(err);
+    console.error("Upload error:", err);
 
     setStatus(
       err.message || "Something went wrong.",
