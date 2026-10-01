@@ -399,27 +399,30 @@ async function restorePrintState() {
     return;
   }
 
+  // Check if there is an active print job in progress (pending or printing)
   const activeJob = jobs.find(job => {
     const status = normalizeStatus(job.status);
     return status === "pending" || status === "printing";
   });
 
   if (activeJob) {
+    // Keep showing live status for ongoing jobs
     currentJobId = activeJob.id;
     localStorage.setItem(JOB_KEY, currentJobId);
     updatePrintStatus(normalizeStatus(activeJob.status), activeJob.file_name, activeJob.created_at);
     renderHistory(jobs);
     startPolling();
-    return;
+  } else {
+    // All jobs are finished/printed: move everything to History & clear active status box
+    currentJobId = null;
+    localStorage.removeItem(JOB_KEY);
+    document.getElementById("printStatus").className = "print-status";
+    document.getElementById("secondaryActions").classList.remove("show");
+    renderHistory(jobs);
+    stopPolling();
   }
-
-  const latestJob = jobs[0];
-  currentJobId = latestJob.id;
-  localStorage.setItem(JOB_KEY, currentJobId);
-  updatePrintStatus(normalizeStatus(latestJob.status), latestJob.file_name, latestJob.updated_at || latestJob.created_at);
-  renderHistory(jobs);
-  stopPolling();
 }
+
 
 async function uploadFile() {
   const btn = document.getElementById("uploadBtn");
