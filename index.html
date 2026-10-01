@@ -331,7 +331,6 @@ function updatePrintStatus(status, fileName, updatedAt) {
   document.getElementById("secondaryActions").classList.toggle("show", status === "printed");
 }
 
-function renderHistory(jobs) {
 function toggleHistoryExpand() {
   historyExpanded = !historyExpanded;
   renderHistory(cachedHistoryJobs);
