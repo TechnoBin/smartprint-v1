@@ -16,8 +16,8 @@
 <div class="fab" id="fab"><span id="fabCount">0 selected</span><label class="selectall"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"> Select all</label><button class="delete" onclick="deleteSelected()">🗑️ Delete</button><button class="cancel" onclick="clearSelection()">Cancel</button></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
 const SUPABASE_URL="https://hommwwdjqzkcoxheerxl.supabase.co";
-const SUPABASE_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwiaWF0IjoxNzgwNDc0ODUyLCJleHAiOjIwOTYwNTA4NTJ9.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
-const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);let currentFilter="all";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbW13d2RqcXprY294aGVlcnhsIiwiaWF0IjoxNzgwNDc0ODUyLCJleHAiOjIwOTYwNTA4NTJ9.ZGp5GZpkcDrjyywfSBQjk2PmIKbJwtDKUs4ruAlNTNY";
+const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);let currentFilter="all";
 function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function formatTime(d){const date=new Date(d),now=new Date(),mins=Math.max(0,Math.floor((now-date)/60000));const ago=mins<1?"just now":mins<60?mins+"m ago":mins<1440?Math.floor(mins/60)+"h ago":Math.floor(mins/1440)+"d ago";const t=date.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});const ds=date.toLocaleDateString([], {day:"numeric",month:"short"});return(now.toDateString()===date.toDateString()?t:ds+" "+t)+" · "+ago;}
 function setFilter(type){currentFilter=type;document.querySelectorAll(".filter").forEach(b=>b.classList.remove("active"));document.getElementById("filter-"+type).classList.add("active");clearSelection();loadJobs();}
