@@ -62,115 +62,23 @@
     .status-printed { background:#f0fdf4; border-color:#bbf7d0; } .status-printed .status-icon { background:#dcfce7; }
     .status-failed { background:#fef2f2; border-color:#fecaca; } .status-failed .status-icon { background:#fee2e2; }
     .status-loading { background:#f8fafc; border-color:#e2e8f0; }
-    /* Print history */
-.print-history {
-  display: none;
-  margin-top: 14px;
-}
-
-.print-history.show {
-  display: block;
-}
-
-.history-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.history-title {
-  font-size: 11px;
-  font-weight: 850;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-}
-
-.history-subtitle {
-  font-size: 11px;
-  color: #94a3b8;
-}
-
-.history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.history-item {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 12px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  transition: .15s;
-}
-
-.history-item.active {
-  border-color: #93c5fd;
-  background: #f8fbff;
-}
-
-.history-item-icon {
-  width: 36px;
-  height: 36px;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  font-size: 18px;
-  background: #f1f5f9;
-}
-
-.history-item-main {
-  min-width: 0;
-  flex: 1;
-}
-
-.history-file {
-  font-size: 13px;
-  font-weight: 750;
-  color: #334155;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.history-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 3px;
-  font-size: 11px;
-  color: #94a3b8;
-}
-
-.history-status {
-  font-size: 11px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.history-status.pending { color: #d97706; }
-.history-status.printing { color: #2563eb; }
-.history-status.printed { color: #16a34a; }
-.history-status.failed { color: #dc2626; }
-
-.history-empty {
-  padding: 18px 12px;
-  text-align: center;
-  background: var(--soft);
-  border: 1px dashed var(--line);
-  border-radius: 13px;
-  color: #94a3b8;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
+    .print-history { display: none; margin-top: 14px; }
+    .print-history.show { display: block; }
+    .history-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+    .history-title { font-size: 11px; font-weight: 850; color: #64748b; text-transform: uppercase; letter-spacing: .08em; }
+    .history-subtitle { font-size: 11px; color: #94a3b8; }
+    .history-list { display: flex; flex-direction: column; gap: 8px; }
+    .history-item { display: flex; align-items: center; gap: 11px; padding: 12px; background: #fff; border: 1px solid var(--line); border-radius: 13px; transition: .15s; }
+    .history-item.active { border-color: #93c5fd; background: #f8fbff; }
+    .history-item-icon { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 10px; font-size: 18px; background: #f1f5f9; }
+    .history-item-main { min-width: 0; flex: 1; }
+    .history-file { font-size: 13px; font-weight: 750; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .history-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; font-size: 11px; color: #94a3b8; }
+    .history-status { font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .history-status.pending { color: #d97706; }
+    .history-status.printing { color: #2563eb; }
+    .history-status.printed { color: #16a34a; }
+    .history-status.failed { color: #dc2626; }
     .secondary-actions { display:none; gap:8px; margin-top:10px; }
     .secondary-actions.show { display:flex; }
     .secondary-actions button { flex:1; min-height:42px; border:1px solid var(--line); background:#fff; color:#334155; border-radius:10px; font-weight:700; cursor:pointer; }
@@ -237,14 +145,12 @@
     </div>
     
     <div class="print-history" id="printHistory">
-  <div class="history-heading">
-    <div class="history-title">Print history</div>
-    <div class="history-subtitle" id="historyCount"></div>
-  </div>
-
-  <div class="history-list" id="historyList"></div>
-</div>
-
+      <div class="history-heading">
+        <div class="history-title">Print history</div>
+        <div class="history-subtitle" id="historyCount"></div>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
 
     <div class="secondary-actions" id="secondaryActions"><button type="button" onclick="startNewPrint()">＋ New print</button><button type="button" onclick="openNameEditor()">✏️ Edit name</button></div>
     <div class="footer-link"><a href="/admin.html">Print dashboard →</a></div>
@@ -262,6 +168,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
+
 const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_muM1Xml6MpBwct6-kpvZXg_ejuz9Z8V";
 const BW_PRICE = 2, COLOR_PRICE = 5;
@@ -288,6 +196,7 @@ function saveName(){ const name=document.getElementById("nameEditor").value.trim
 function checkReady(){ const name=document.getElementById("customerName").value.trim(); const input=document.getElementById("customerName"); input.className=name?"filled":""; const ready=name && selectedFile && pageCount>0 && !readingPDF; document.getElementById("uploadBtn").disabled=!ready; if(ready) updateSummary(); }
 function updateSummary(){ const name=document.getElementById("customerName").value.trim(); if(!selectedFile||!pageCount||!name)return; const p=printType==="color"?COLOR_PRICE:BW_PRICE, total=pageCount*p, kb=Math.round(selectedFile.size/1024); const size=kb>1024?(kb/1024).toFixed(1)+" MB":kb+" KB"; document.getElementById("s-customer").textContent=name; document.getElementById("s-file").textContent=selectedFile.name+" ("+size+")"; document.getElementById("s-pages").textContent=pageCount; document.getElementById("s-type").textContent=printType==="color"?"Color":"Black & White"; document.getElementById("s-ppp").textContent="Rs."+p; document.getElementById("s-total").textContent="Rs."+total; document.getElementById("summary").style.display="block"; }
 function onTypeChange(){ printType=document.querySelector('input[name="type"]:checked').value; if(pageCount)updateSummary(); }
+
 async function onFileSelect() {
   const file = document.getElementById("fileInput").files[0];
   selectedFile = file || null;
@@ -330,79 +239,39 @@ async function onFileSelect() {
     readingPDF = false;
   }
 }
+
 function resetFileUI(clearInput=true){ selectedFile=null; pageCount=0; readingPDF=false; if(clearInput)document.getElementById("fileInput").value=""; document.getElementById("uploadArea").className="upload-area"; document.getElementById("uploadIcon").textContent="📄"; document.getElementById("uploadText").textContent="Tap to choose a PDF"; document.getElementById("uploadHint").textContent="PDF files only"; document.getElementById("summary").style.display="none"; document.getElementById("uploadBtn").disabled=true; }
+
 function normalizeStatus(status) {
-  // Support both "printed" and "done"
   if (status === "done") return "printed";
   return status || "pending";
 }
 
 function getStatusInfo(status) {
   status = normalizeStatus(status);
-
   const map = {
-    pending: {
-      icon: "⏳",
-      title: "Print pending",
-      text: "Your document is waiting to be printed."
-    },
-
-    printing: {
-      icon: "🖨️",
-      title: "Printing",
-      text: "Your document is currently being printed."
-    },
-
-    printed: {
-      icon: "✅",
-      title: "Printed successfully",
-      text: "Your document has been printed."
-    },
-
-    failed: {
-      icon: "⚠️",
-      title: "Print failed",
-      text: "We could not complete this print job."
-    }
+    pending: { icon: "⏳", title: "Print pending", text: "Your document is waiting to be printed." },
+    printing: { icon: "🖨️", title: "Printing", text: "Your document is currently being printed." },
+    printed: { icon: "✅", title: "Printed successfully", text: "Your document has been printed." },
+    failed: { icon: "⚠️", title: "Print failed", text: "We could not complete this print job." }
   };
-
-  return map[status] || {
-    icon: "⏳",
-    title: "Checking status",
-    text: "Checking your print job..."
-  };
+  return map[status] || { icon: "⏳", title: "Checking status", text: "Checking your print job..." };
 }
 
 function formatTime(dateValue) {
   if (!dateValue) return "";
-
   const date = new Date(dateValue);
-
   if (Number.isNaN(date.getTime())) return "";
-
-  return date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 function formatDate(dateValue) {
   if (!dateValue) return "";
-
   const date = new Date(dateValue);
-
   if (Number.isNaN(date.getTime())) return "";
-
   const today = new Date();
-
-  if (date.toDateString() === today.toDateString()) {
-    return formatTime(dateValue);
-  }
-
-  return date.toLocaleDateString([], {
-    day: "numeric",
-    month: "short"
-  }) + " · " + formatTime(dateValue);
+  if (date.toDateString() === today.toDateString()) return formatTime(dateValue);
+  return date.toLocaleDateString([], { day: "numeric", month: "short" }) + " · " + formatTime(dateValue);
 }
 
 function escapeHtml(value) {
@@ -416,26 +285,16 @@ function escapeHtml(value) {
 
 function updatePrintStatus(status, fileName, updatedAt) {
   status = normalizeStatus(status);
-
   const box = document.getElementById("printStatus");
-
-  box.className = "print-status show";
-  box.classList.add("status-" + status);
+  box.className = "print-status show status-" + status;
 
   const info = getStatusInfo(status);
-
   document.getElementById("printStatusIcon").textContent = info.icon;
   document.getElementById("printStatusTitle").textContent = info.title;
   document.getElementById("printStatusText").textContent = info.text;
-
-  document.getElementById("statusFile").textContent =
-    fileName || "Print job";
-
-  document.getElementById("statusUpdated").textContent =
-    formatTime(updatedAt);
-
-  document.getElementById("secondaryActions")
-    .classList.toggle("show", status === "printed");
+  document.getElementById("statusFile").textContent = fileName || "Print job";
+  document.getElementById("statusUpdated").textContent = formatTime(updatedAt);
+  document.getElementById("secondaryActions").classList.toggle("show", status === "printed");
 }
 
 function renderHistory(jobs) {
@@ -443,7 +302,6 @@ function renderHistory(jobs) {
   const historyList = document.getElementById("historyList");
   const historyCount = document.getElementById("historyCount");
 
-  // Never show the currently active job inside history.
   const historyJobs = (jobs || []).filter(job => job.id !== currentJobId);
 
   if (!historyJobs.length) {
@@ -454,67 +312,28 @@ function renderHistory(jobs) {
   }
 
   historyBox.classList.add("show");
-
-  historyCount.textContent =
-    historyJobs.length +
-    (historyJobs.length === 1 ? " print" : " prints");
+  historyCount.textContent = historyJobs.length + (historyJobs.length === 1 ? " print" : " prints");
 
   historyList.innerHTML = historyJobs.map(job => {
     const status = normalizeStatus(job.status);
     const info = getStatusInfo(status);
-
-    const printType =
-      job.print_type === "color" ? "Color" : "B&W";
-
-    const price =
-      job.price !== null && job.price !== undefined
-        ? `₹${job.price}`
-        : "";
+    const printType = job.print_type === "color" ? "Color" : "B&W";
+    const price = job.price !== null && job.price !== undefined ? `₹${job.price}` : "";
 
     return `
       <div class="history-item">
-        <div class="history-item-icon">
-          ${info.icon}
-        </div>
-
+        <div class="history-item-icon">${info.icon}</div>
         <div class="history-item-main">
-          <div
-            class="history-file"
-            title="${escapeHtml(job.file_name)}"
-          >
-            ${escapeHtml(job.file_name || "Untitled PDF")}
-          </div>
-
+          <div class="history-file" title="${escapeHtml(job.file_name)}">${escapeHtml(job.file_name || "Untitled PDF")}</div>
           <div class="history-meta">
             <span>${formatDate(job.updated_at || job.created_at)}</span>
-
-            ${
-              job.pages
-                ? `<span>·</span><span>${job.pages} page${job.pages === 1 ? "" : "s"}</span>`
-                : ""
-            }
-
-            <span>·</span>
-            <span>${printType}</span>
-
-            ${
-              price
-                ? `<span>·</span><span>${price}</span>`
-                : ""
-            }
+            ${job.pages ? `<span>·</span><span>${job.pages} page${job.pages === 1 ? "" : "s"}</span>` : ""}
+            <span>·</span><span>${printType}</span>
+            ${price ? `<span>·</span><span>${price}</span>` : ""}
           </div>
         </div>
-
         <div class="history-status ${status}">
-          ${
-            status === "pending"
-              ? "Pending"
-              : status === "printing"
-              ? "Printing"
-              : status === "printed"
-              ? "Printed"
-              : "Failed"
-          }
+          ${status === "pending" ? "Pending" : status === "printing" ? "Printing" : status === "printed" ? "Printed" : "Failed"}
         </div>
       </div>
     `;
@@ -522,20 +341,9 @@ function renderHistory(jobs) {
 }
 
 async function loadPrintHistory() {
-  const {
-    data,
-    error
-  } = await client
+  const { data, error } = await client
     .from("print_jobs")
-    .select(`
-      id,
-      status,
-      file_name,
-      pages,
-      print_type,
-      price,
-      created_at
-    `)
+    .select(`id, status, file_name, pages, print_type, price, created_at`)
     .eq("device_id", deviceId)
     .order("created_at", { ascending: false });
 
@@ -543,67 +351,34 @@ async function loadPrintHistory() {
     console.warn("Could not load print history:", error.message);
     return [];
   }
-
   return data || [];
 }
+
 async function checkPrintStatus() {
   if (!currentJobId) return;
 
-  const {
-    data,
-    error
-  } = await client
+  const { data, error } = await client
     .from("print_jobs")
-    .select(`
-      id,
-      status,
-      file_name,
-      created_at,
-      pages,
-      print_type,
-      price
-    `)
+    .select(`id, status, file_name, created_at, pages, print_type, price`)
     .eq("id", currentJobId)
     .eq("device_id", deviceId)
     .maybeSingle();
 
-  if (error) {
-    console.warn("Status check:", error.message);
-    return;
-  }
-
-  if (!data) {
-    console.warn("Current print job was not found.");
-    return;
-  }
+  if (error || !data) return;
 
   const status = normalizeStatus(data.status);
+  updatePrintStatus(status, data.file_name, data.created_at);
 
-  updatePrintStatus(
-    status,
-    data.file_name,
-    data.created_at
-  );
-
-  // Reload all jobs so history always reflects
-  // the latest status from Supabase.
   const jobs = await loadPrintHistory();
-
   renderHistory(jobs);
 
-  if (status === "printed" || status === "failed") {
-    stopPolling();
-  }
+  if (status === "printed" || status === "failed") stopPolling();
 }
-  
+
 function startPolling() {
   stopPolling();
-
   checkPrintStatus();
-
-  statusCheckInterval = setInterval(() => {
-    checkPrintStatus();
-  }, 3000);
+  statusCheckInterval = setInterval(checkPrintStatus, 3000);
 }
 
 function stopPolling() {
@@ -614,162 +389,69 @@ function stopPolling() {
 }
 
 async function restorePrintState() {
-  /*
-    Supabase contains the complete print history
-    for this device.
-  */
-
   const jobs = await loadPrintHistory();
 
   if (!jobs.length) {
     currentJobId = null;
-
-    document.getElementById("printStatus").className =
-      "print-status";
-
-    document.getElementById("secondaryActions")
-      .classList.remove("show");
-
+    document.getElementById("printStatus").className = "print-status";
+    document.getElementById("secondaryActions").classList.remove("show");
     renderHistory([]);
-
     return;
   }
 
-  /*
-    Find the newest unfinished job.
-    That becomes the CURRENT PRINT.
-  */
-
   const activeJob = jobs.find(job => {
     const status = normalizeStatus(job.status);
-
     return status === "pending" || status === "printing";
   });
 
   if (activeJob) {
     currentJobId = activeJob.id;
-
     localStorage.setItem(JOB_KEY, currentJobId);
-
-    updatePrintStatus(
-      normalizeStatus(activeJob.status),
-      activeJob.file_name,
-      activeJob.created_at
-    );
-
-    /*
-      IMPORTANT:
-      Render history AFTER currentJobId is known.
-      Therefore the current job is excluded.
-    */
+    updatePrintStatus(normalizeStatus(activeJob.status), activeJob.file_name, activeJob.created_at);
     renderHistory(jobs);
-
     startPolling();
-
     return;
   }
 
-  /*
-    No pending/printing job exists.
-
-    Show the newest job as CURRENT PRINT.
-  */
-
   const latestJob = jobs[0];
-
   currentJobId = latestJob.id;
-
   localStorage.setItem(JOB_KEY, currentJobId);
-
-  updatePrintStatus(
-    normalizeStatus(latestJob.status),
-    latestJob.file_name,
-    latestJob.created_at
-  );
-
-  /*
-    Again, render AFTER currentJobId is set.
-  */
+  updatePrintStatus(normalizeStatus(latestJob.status), latestJob.file_name, latestJob.updated_at || latestJob.created_at);
   renderHistory(jobs);
-
   stopPolling();
 }
-  /*
-    No pending/printing job exists.
 
-    Show the newest completed job in the main
-    status card instead of "Checking status..."
-  */
-  const latestJob = jobs[0];
-
-  currentJobId = latestJob.id;
-
-  updatePrintStatus(
-    normalizeStatus(latestJob.status),
-    latestJob.file_name,
-    latestJob.updated_at || latestJob.created_at
-  );
-
-  localStorage.setItem(JOB_KEY, currentJobId);
-
-  stopPolling();
-}
- async function uploadFile() {
+async function uploadFile() {
   const btn = document.getElementById("uploadBtn");
   const name = document.getElementById("customerName").value.trim();
 
-  if (!selectedFile || !name) {
-    setStatus("Please select a file and enter your name.", "error");
-    return;
-  }
-
-  // Check if page count is valid
-  if (pageCount <= 0) {
-    setStatus("PDF page count is invalid. Please try uploading again.", "error");
+  if (!selectedFile || !name || pageCount <= 0) {
+    setStatus("Please select a valid file and enter your name.", "error");
     return;
   }
 
   localStorage.setItem(NAME_KEY, name);
-
   btn.disabled = true;
   btn.textContent = "Uploading...";
-
   setStatus("Uploading your PDF, please wait...", "info");
 
   try {
-    const fileName =
-      Date.now() +
-      "_" +
-      Math.random().toString(36).slice(2, 8) +
-      "_" +
-      selectedFile.name;
+    const fileName = Date.now() + "_" + Math.random().toString(36).slice(2, 8) + "_" + selectedFile.name;
 
-    // Upload file to Supabase Storage
     const { error: uploadError } = await client.storage
       .from("print-files")
-      .upload(fileName, selectedFile, {
-        contentType: "application/pdf",
-        upsert: false
-      });
+      .upload(fileName, selectedFile, { contentType: "application/pdf", upsert: false });
 
-    if (uploadError) {
-      throw new Error("Upload failed: " + uploadError.message);
-    }
+    if (uploadError) throw new Error("Upload failed: " + uploadError.message);
 
-    // Get public URL
     const { data: urlData, error: urlError } = client.storage
       .from("print-files")
       .getPublicUrl(fileName);
 
-    if (urlError || !urlData?.publicUrl) {
-      throw new Error("Could not get file URL: " + (urlError?.message || "Unknown error"));
-    }
+    if (urlError || !urlData?.publicUrl) throw new Error("Could not get file URL");
 
-    const total =
-      pageCount *
-      (printType === "color" ? COLOR_PRICE : BW_PRICE);
+    const total = pageCount * (printType === "color" ? COLOR_PRICE : BW_PRICE);
 
-    // Insert job record in database
     const { data: jobData, error: dbError } = await client
       .from("print_jobs")
       .insert([{
@@ -782,93 +464,47 @@ async function restorePrintState() {
         price: total,
         status: "pending"
       }])
-      .select("id,status,file_name,created_at")
+      .select("id, status, file_name, created_at")
       .single();
 
-    if (dbError) {
-      throw new Error("Database error: " + dbError.message);
-    }
+    if (dbError) throw new Error("Database error: " + dbError.message);
 
     currentJobId = jobData.id;
     localStorage.setItem(JOB_KEY, currentJobId);
 
-    setStatus(
-      "Your PDF has been uploaded successfully.",
-      "success"
-    );
-
-    updatePrintStatus(
-      "pending",
-      jobData.file_name,
-      jobData.created_at
-    );
+    setStatus("Your PDF has been uploaded successfully.", "success");
+    updatePrintStatus("pending", jobData.file_name, jobData.created_at);
 
     btn.textContent = "Uploaded ✓";
     document.getElementById("summary").style.display = "none";
-
     resetFileUI();
 
-// Refresh history after the new job is created.
-// Because currentJobId is already set,
-// the new/current job will NOT appear in history.
-const jobs = await loadPrintHistory();
-renderHistory(jobs);
-
+    const jobs = await loadPrintHistory();
+    renderHistory(jobs);
     startPolling();
 
   } catch (err) {
     console.error("Upload error:", err);
-
-    setStatus(
-      err.message || "Something went wrong.",
-      "error"
-    );
-
+    setStatus(err.message || "Something went wrong.", "error");
     btn.disabled = false;
     btn.textContent = "Upload & Print";
   }
 }
 
-
 function startNewPrint() {
-  /*
-    Don't delete print history.
-    Supabase is now responsible for remembering
-    previous jobs.
-  */
-
   stopPolling();
-
   currentJobId = null;
-
-  document.getElementById("printStatus").className =
-    "print-status";
-
-  document.getElementById("secondaryActions")
-    .classList.remove("show");
-
-  setStatus("", " ");
-
+  document.getElementById("printStatus").className = "print-status";
+  document.getElementById("secondaryActions").classList.remove("show");
+  setStatus("", "");
   resetFileUI();
-
-  document.getElementById("uploadBtn").textContent =
-    "Upload & Print";
-
-  document.getElementById("customerName").value =
-    localStorage.getItem(NAME_KEY) || "";
-
+  document.getElementById("uploadBtn").textContent = "Upload & Print";
+  document.getElementById("customerName").value = localStorage.getItem(NAME_KEY) || "";
   checkReady();
-
-  /*
-    History stays visible.
-  */
   loadPrintHistory();
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
+
 setWelcome();
 restorePrintState();
 </script>
