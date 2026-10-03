@@ -535,10 +535,270 @@ async function loadPrintHistory() {
     .eq("device_id", deviceId)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.warn("Could not load print history:", error.message);
-    return [];
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
+
+const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_muM1Xml6MpBwct6-kpvZXg_ejuz9Z8V";
+
+const BW_PRICE = 2, COLOR_PRICE = 5;
+const MAX_FILE_SIZE = 25 * 1024 * 1024;
+const DEVICE_KEY = "smartprint_device_id_v1";
+const NAME_KEY = "smartprint_customer_name_v1";
+const JOB_KEY = "smartprint_last_job_id_v1";
+
+let selectedFile = null, pageCount = 0, printType = "bw", readingPDF = false;
+let currentJobId = null, historyExpanded = false, cachedHistoryJobs = [];
+let autoPollTimer = null;
+
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function getDeviceId() {
+  let id = localStorage.getItem(DEVICE_KEY);
+  if (!id) { 
+    id = (crypto.randomUUID ? crypto.randomUUID() : fallbackId()); 
+    localStorage.setItem(DEVICE_KEY, id); 
   }
+  return id;
+}
+function fallbackId() { return "sp-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,12); }
+const deviceId = getDeviceId();
+
+function setStatus(msg, type) { 
+  const el = document.getElementById("status"); 
+  el.textContent = msg; 
+  el.className = type || ""; 
+}
+
+function setWelcome() { 
+  const name = localStorage.getItem(NAME_KEY) || ""; 
+  const input = document.getElementById("customerName"); 
+  input.value = name; 
+  input.className = name ? "filled" : ""; 
+  document.getElementById("welcome").textContent = name ? `Welcome back, ${name} 👋` : ""; 
+  document.getElementById("welcome").classList.toggle("show", !!name); 
+}
+
+function openNameEditor() { 
+  document.getElementById("nameEditor").value = document.getElementById("customerName").value.trim(); 
+  document.getElementById("nameModal").classList.add("show"); 
+  setTimeout(() => document.getElementById("nameEditor").focus(), 50); 
+}
+
+function closeNameEditor() { 
+  document.getElementById("nameModal").classList.remove("show"); 
+}
+
+function saveName() { 
+  const name = document.getElementById("nameEditor").value.trim(); 
+  if (!name) { alert("Please enter your name."); return; } 
+  localStorage.setItem(NAME_KEY, name); 
+  document.getElementById("customerName").value = name; 
+  document.getElementById("customerName").className = "filled"; 
+  setWelcome(); 
+  updateSummary(); 
+  checkReady(); 
+  closeNameEditor(); 
+}
+
+function checkReady() { 
+  const name = document.getElementById("customerName").value.trim(); 
+  const input = document.getElementById("customerName"); 
+  input.className = name ? "filled" : ""; 
+  const ready = name && selectedFile && pageCount > 0 && !readingPDF; 
+  document.getElementById("uploadBtn").disabled = !ready; 
+  if (ready) updateSummary(); 
+}
+
+function updateSummary() { 
+  const name = document.getElementById("customerName").value.trim(); 
+  if (!selectedFile || !pageCount || !name) return; 
+  const p = printType === "color" ? COLOR_PRICE : BW_PRICE;
+  const total = pageCount * p;
+  const kb = Math.round(selectedFile.size / 1024); 
+  const size = kb > 1024 ? (kb / 1024).toFixed(1) + " MB" : kb + " KB"; 
+
+  document.getElementById("s-customer").textContent = name; 
+  document.getElementById("s-file").textContent = selectedFile.name + " (" + size + ")"; 
+  document.getElementById("s-pages").textContent = pageCount; 
+  document.getElementById("s-type").textContent = printType === "color" ? "Color" : "Black & White"; 
+  document.getElementById("s-ppp").textContent = "Rs." + p; 
+  document.getElementById("s-total").textContent = "Rs." + total; 
+  document.getElementById("summary").style.display = "block"; 
+}
+
+function onTypeChange() { 
+  printType = document.querySelector('input[name="type"]:checked').value; 
+  if (pageCount) updateSummary(); 
+}
+
+async function onFileSelect() {
+  const file = document.getElementById("fileInput").files[0];
+  selectedFile = file || null;
+  pageCount = 0;
+  readingPDF = false;
+
+  if (!file) {
+    resetFileUI();
+    checkReady();
+    return;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    setStatus("File is too large. Max size is 25MB.", "error");
+    resetFileUI();
+    checkReady();
+    return;
+  }
+
+  readingPDF = true;
+  document.getElementById("uploadArea").className = "upload-area loading";
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    pageCount = pdf.numPages;
+    
+    document.getElementById("uploadArea").className = "upload-area has-file";
+    document.getElementById("uploadIcon").textContent = "✓";
+    document.getElementById("uploadText").textContent = file.name;
+    document.getElementById("uploadHint").textContent = `${pageCount} page${pageCount !== 1 ? "s" : ""}`;
+    
+    readingPDF = false;
+    checkReady();
+  } catch (err) {
+    setStatus("Could not read PDF file.", "error");
+    resetFileUI();
+    readingPDF = false;
+  }
+}
+
+function resetFileUI(clearInput = true) { 
+  selectedFile = null; 
+  pageCount = 0; 
+  readingPDF = false; 
+  if (clearInput) document.getElementById("fileInput").value = ""; 
+  document.getElementById("uploadArea").className = "upload-area"; 
+  document.getElementById("uploadIcon").textContent = "📄"; 
+  document.getElementById("uploadText").textContent = "Tap to choose a PDF"; 
+  document.getElementById("uploadHint").textContent = "PDF files only"; 
+  document.getElementById("summary").style.display = "none"; 
+  document.getElementById("uploadBtn").disabled = true; 
+}
+
+function normalizeStatus(status) {
+  if (status === "done") return "printed";
+  return status || "pending";
+}
+
+function getStatusInfo(status) {
+  status = normalizeStatus(status);
+  const map = {
+    pending: { icon: "⏳", title: "Print pending", text: "Your file is queued. Please show your name at the counter." },
+    printing: { icon: "🖨️", title: "Printing now", text: "Your document is currently being printed by the shopkeeper." },
+    printed: { icon: "✅", title: "Printed successfully", text: "Your job is ready! Please collect your pages at the print counter." },
+    failed: { icon: "⚠️", title: "Print failed", text: "We could not complete this print job." }
+  };
+  return map[status] || { icon: "⏳", title: "Checking status", text: "Checking your print job..." };
+}
+
+function parseDate(dateValue) {
+  if (!dateValue) return null;
+  if (dateValue instanceof Date) return dateValue;
+  let str = String(dateValue).trim().replace(" ", "T");
+  if (!str.endsWith("Z") && !/[+-]\d{2}:?\d{2}$/.test(str)) str += "Z";
+  const date = new Date(str);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatTime(dateValue) {
+  const date = parseDate(dateValue);
+  if (!date) return "";
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+}
+
+function formatDate(dateValue) {
+  const date = parseDate(dateValue);
+  if (!date) return "";
+  const today = new Date();
+  if (date.toDateString() === today.toDateString()) return formatTime(date);
+  return date.toLocaleDateString([], { day: "numeric", month: "short" }) + " · " + formatTime(date);
+}
+
+function escapeHtml(value) {
+  return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function updatePrintStatus(status, fileName, updatedAt) {
+  status = normalizeStatus(status);
+  const box = document.getElementById("printStatus");
+  box.className = "print-status show status-" + status;
+
+  const info = getStatusInfo(status);
+  document.getElementById("printStatusIcon").textContent = info.icon;
+  document.getElementById("printStatusTitle").textContent = info.title;
+  document.getElementById("printStatusText").textContent = info.text;
+  document.getElementById("statusFile").textContent = fileName || "Print job";
+  document.getElementById("statusUpdated").textContent = formatTime(updatedAt);
+  document.getElementById("secondaryActions").classList.toggle("show", status === "printed");
+}
+
+function renderHistory(jobs) {
+  cachedHistoryJobs = jobs || [];
+  const historyBox = document.getElementById("printHistory");
+  const historyList = document.getElementById("historyList");
+  const historyCount = document.getElementById("historyCount");
+
+  const historyJobs = cachedHistoryJobs.filter(job => job.id !== currentJobId);
+
+  if (!historyJobs.length) {
+    historyBox.classList.remove("show");
+    historyList.innerHTML = "";
+    historyCount.textContent = "";
+    return;
+  }
+
+  historyBox.classList.add("show");
+  historyCount.textContent = historyJobs.length + (historyJobs.length === 1 ? " print" : " prints");
+
+  const displayJobs = historyExpanded ? historyJobs : historyJobs.slice(0, 3);
+
+  historyList.innerHTML = displayJobs.map(job => {
+    const status = normalizeStatus(job.status);
+    const info = getStatusInfo(status);
+    const pType = job.print_type === "color" ? "Color" : "B&W";
+    const price = job.price !== null && job.price !== undefined ? `Rs.${job.price}` : "";
+
+    const fileLink = job.file_url 
+      ? `<a href="${escapeHtml(job.file_url)}" target="_blank" rel="noopener noreferrer" class="history-file-link">${escapeHtml(job.file_name || "Untitled PDF")} ↗</a>`
+      : `<div class="history-file">${escapeHtml(job.file_name || "Untitled PDF")}</div>`;
+
+    return `
+      <div class="history-item">
+        <div class="history-item-icon">${info.icon}</div>
+        <div class="history-item-main">
+          ${fileLink}
+          <div class="history-meta">
+            <span>${formatDate(job.created_at)}</span>
+            ${job.pages ? `<span>·</span><span>${job.pages} pg</span>` : ""}
+            <span>·</span><span>${pType}</span>
+            ${price ? `<span>·</span><span>${price}</span>` : ""}
+          </div>
+        </div>
+        <div class="history-status ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function loadPrintHistory() {
+  const { data } = await client
+    .from("print_jobs")
+    .select(`id, status, file_name, file_url, pages, print_type, price, created_at`)
+    .eq("device_id", deviceId)
+    .order("created_at", { ascending: false });
   return data || [];
 }
 
@@ -564,36 +824,22 @@ async function refreshState() {
   renderHistory(jobs);
 }
 
-// Realtime listener for status changes from the shopkeeper
-function setupRealtimeListener() {
-  if (realtimeChannel) client.removeChannel(realtimeChannel);
-
-  realtimeChannel = client
-    .channel("customer-job-sync")
-    .on("postgres_changes", { 
-      event: "*", 
-      schema: "public", 
-      table: "print_jobs",
-      filter: `device_id=eq.${deviceId}`
-    }, () => {
-      refreshState();
-    })
-    .subscribe();
+// Automatic 3-second live sync polling
+function startPolling() {
+  if (autoPollTimer) clearInterval(autoPollTimer);
+  autoPollTimer = setInterval(refreshState, 3000);
 }
 
 async function uploadFile() {
   const btn = document.getElementById("uploadBtn");
   const name = document.getElementById("customerName").value.trim();
 
-  if (!selectedFile || !name || pageCount <= 0) {
-    setStatus("Please select a valid PDF file and enter your name.", "error");
-    return;
-  }
+  if (!selectedFile || !name || pageCount <= 0) return;
 
   localStorage.setItem(NAME_KEY, name);
   btn.disabled = true;
   btn.textContent = "Uploading...";
-  setStatus("Uploading your PDF, please wait...", "info");
+  setStatus("Uploading your PDF...", "info");
 
   try {
     const fileName = Date.now() + "_" + Math.random().toString(36).slice(2, 8) + "_" + selectedFile.name;
@@ -602,14 +848,9 @@ async function uploadFile() {
       .from("print-files")
       .upload(fileName, selectedFile, { contentType: "application/pdf", upsert: false });
 
-    if (uploadError) throw new Error("Upload failed: " + uploadError.message);
+    if (uploadError) throw new Error(uploadError.message);
 
-    const { data: urlData } = client.storage
-      .from("print-files")
-      .getPublicUrl(fileName);
-
-    if (!urlData?.publicUrl) throw new Error("Could not retrieve public file URL.");
-
+    const { data: urlData } = client.storage.from("print-files").getPublicUrl(fileName);
     const total = pageCount * (printType === "color" ? COLOR_PRICE : BW_PRICE);
 
     const { data: jobData, error: dbError } = await client
@@ -627,7 +868,7 @@ async function uploadFile() {
       .select("id, status, file_name, created_at")
       .single();
 
-    if (dbError) throw new Error("Database error: " + dbError.message);
+    if (dbError) throw new Error(dbError.message);
 
     currentJobId = jobData.id;
     localStorage.setItem(JOB_KEY, currentJobId);
@@ -638,12 +879,10 @@ async function uploadFile() {
     btn.textContent = "Uploaded ✓";
     document.getElementById("summary").style.display = "none";
     resetFileUI();
-
     refreshState();
 
   } catch (err) {
-    console.error("Upload error:", err);
-    setStatus(err.message || "Something went wrong during upload.", "error");
+    setStatus(err.message || "Upload failed.", "error");
     btn.disabled = false;
     btn.textContent = "Upload & Print";
   }
@@ -659,13 +898,11 @@ function startNewPrint() {
   document.getElementById("customerName").value = localStorage.getItem(NAME_KEY) || "";
   checkReady();
   refreshState();
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// Initial Boot
 setWelcome();
 refreshState();
-setupRealtimeListener();
+startPolling();
 </script>
 </body>
 </html>
