@@ -1,305 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0f172a">
-  <title>SmartPrint</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; --soft:#f8fafc; --blue:#2563eb; }
-    body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:#f1f5f9; min-height:100vh; color:var(--ink); padding:16px; }
-    .page { width:100%; max-width:520px; margin:0 auto; padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
-    .card { background:#fff; border:1px solid rgba(226,232,240,.9); border-radius:20px; padding:20px; box-shadow:0 10px 35px rgba(15,23,42,.08); }
-    .brand { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px; }
-    .brand-main { display:flex; align-items:center; gap:10px; }
-    .brand-icon { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; background:#eff6ff; font-size:21px; }
-    .brand-name { font-size:20px; font-weight:800; letter-spacing:-.3px; }
-    .brand-sub { font-size:11px; color:#94a3b8; margin-top:2px; }
-    .profile-chip { border:1px solid var(--line); background:#fff; color:#475569; border-radius:999px; padding:7px 10px; font-size:12px; cursor:pointer; }
-    .section-label { font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.08em; margin:18px 0 8px; }
-    .input-wrap { position:relative; }
-    .input-wrap input { width:100%; padding:13px 42px 13px 42px; border:1.5px solid var(--line); border-radius:12px; font:inherit; font-size:15px; color:var(--ink); outline:none; background:#fff; }
-    .input-wrap input:focus { border-color:#60a5fa; box-shadow:0 0 0 3px rgba(59,130,246,.10); }
-    .input-wrap input.filled { border-color:#86efac; }
-    .input-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); pointer-events:none; }
-    .edit-name { position:absolute; right:8px; top:50%; transform:translateY(-50%); border:0; background:var(--soft); color:#475569; border-radius:8px; padding:6px 8px; font-size:12px; cursor:pointer; }
-    .upload-area { border:2px dashed #cbd5e1; border-radius:15px; padding:30px 16px; text-align:center; cursor:pointer; background:var(--soft); position:relative; transition:.2s; }
-    .upload-area:hover,.upload-area:focus-within { border-color:#60a5fa; background:#eff6ff; }
-    .upload-area.loading { border-color:#f59e0b; background:#fffbeb; }
-    .upload-area.has-file { border-color:#22c55e; background:#f0fdf4; }
-    .upload-area input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
-    .upload-icon { font-size:34px; margin-bottom:8px; }
-    .upload-text { font-size:14px; font-weight:700; color:#334155; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .upload-hint { font-size:12px; color:#94a3b8; margin-top:5px; }
-    .type-toggle { display:flex; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-    .type-toggle input { display:none; }
-    .type-toggle label { flex:1; text-align:center; padding:12px 8px; font-size:13px; font-weight:700; color:#64748b; cursor:pointer; background:#fff; transition:.15s; line-height:1.45; }
-    .type-toggle label + label { border-left:1px solid var(--line); }
-    .type-toggle input:checked + label { background:var(--ink); color:#fff; }
-    #summary { background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:14px; margin-top:18px; }
-    .summary-row,.summary-total { display:flex; justify-content:space-between; gap:12px; padding:5px 0; font-size:13px; }
-    .summary-row span:first-child { color:var(--muted); }
-    .summary-row span:last-child { font-weight:650; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .summary-total { margin-top:7px; padding-top:11px; border-top:1px solid var(--line); font-size:15px; font-weight:800; }
-    .summary-total span:last-child { color:#16a34a; font-size:17px; }
-    .btn-upload { width:100%; margin-top:16px; padding:14px; background:var(--blue); color:#fff; border:0; border-radius:12px; font:inherit; font-size:15px; font-weight:800; cursor:pointer; min-height:50px; box-shadow:0 6px 16px rgba(37,99,235,.18); }
-    .btn-upload:active:not(:disabled) { transform:translateY(1px); }
-    .btn-upload:disabled { background:#e2e8f0; color:#94a3b8; box-shadow:none; cursor:not-allowed; }
-    #status { margin-top:12px; padding:12px 14px; border-radius:11px; font-size:13px; font-weight:650; display:none; }
-    #status.info { display:block; background:#dbeafe; color:#1d4ed8; }
-    #status.success { display:block; background:#dcfce7; color:#15803d; }
-    #status.error { display:block; background:#fee2e2; color:#b91c1c; }
-    .print-status { display:none; margin-top:14px; border-radius:15px; border:1px solid var(--line); overflow:hidden; }
-    .print-status.show { display:block; }
-    .status-head { display:flex; align-items:center; gap:12px; padding:15px; }
-    .status-icon { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-size:21px; flex:0 0 auto; }
-    .status-title { font-size:14px; font-weight:850; }
-    .status-text { font-size:12px; color:#64748b; margin-top:3px; line-height:1.4; }
-    .status-job { border-top:1px solid rgba(148,163,184,.18); padding:10px 15px; display:flex; justify-content:space-between; gap:10px; font-size:11px; color:#64748b; background:rgba(255,255,255,.45); }
-    .status-pending { background:#fffbeb; border-color:#fde68a; } .status-pending .status-icon { background:#fef3c7; }
-    .status-printing { background:#eff6ff; border-color:#bfdbfe; } .status-printing .status-icon { background:#dbeafe; }
-    .status-printed { background:#f0fdf4; border-color:#bbf7d0; } .status-printed .status-icon { background:#dcfce7; }
-    .status-failed { background:#fef2f2; border-color:#fecaca; } .status-failed .status-icon { background:#fee2e2; }
-    .status-loading { background:#f8fafc; border-color:#e2e8f0; }
-    .print-history { display: none; margin-top: 14px; }
-    .print-history.show { display: block; }
-    .history-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-    .history-title { font-size: 11px; font-weight: 850; color: #64748b; text-transform: uppercase; letter-spacing: .08em; }
-    .history-subtitle { font-size: 11px; color: #94a3b8; }
-    .history-list { display: flex; flex-direction: column; gap: 8px; }
-    .history-item { display: flex; align-items: center; gap: 11px; padding: 12px; background: #fff; border: 1px solid var(--line); border-radius: 13px; transition: .15s; }
-    .history-item.active { border-color: #93c5fd; background: #f8fbff; }
-    .history-item-icon { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 10px; font-size: 18px; background: #f1f5f9; }
-    .history-item-main { min-width: 0; flex: 1; }
-    .history-file { font-size: 13px; font-weight: 750; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .history-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; font-size: 11px; color: #94a3b8; }
-    .history-status { font-size: 11px; font-weight: 800; white-space: nowrap; }
-    .history-status.pending { color: #d97706; }
-    .history-status.printing { color: #2563eb; }
-    .history-status.printed { color: #16a34a; }
-    .history-status.failed { color: #dc2626; }
-    .secondary-actions { display:none; gap:8px; margin-top:10px; }
-    .secondary-actions.show { display:flex; }
-    .secondary-actions button { flex:1; min-height:42px; border:1px solid var(--line); background:#fff; color:#334155; border-radius:10px; font-weight:700; cursor:pointer; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>SmartPrint Dashboard</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; background: #f1f5f9; min-height: 100vh; color: #0f172a; padding: 18px 12px 100px; }
+.wrap { max-width: 920px; margin: auto; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.header h1 { font-size: 22px; letter-spacing: -.3px; }
+.header p { font-size: 12px; color: #94a3b8; margin-top: 3px; }
+.count { background: #0f172a; color: #fff; border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 800; white-space: nowrap; }
 
-    
-    .welcome { display:none; margin:-6px 0 16px; font-size:13px; color:#64748b; }
-    .welcome.show { display:block; }
-    .modal-backdrop { position:fixed; inset:0; background:rgba(15,23,42,.42); display:none; align-items:flex-end; justify-content:center; padding:14px; z-index:20; }
-    .modal-backdrop.show { display:flex; }
-    .modal { width:min(100%,420px); background:#fff; border-radius:18px; padding:18px; box-shadow:0 20px 50px rgba(15,23,42,.22); }
-    .modal h3 { font-size:17px; margin-bottom:5px; } .modal p { font-size:12px; color:#64748b; margin-bottom:13px; }
-    .modal input { width:100%; padding:12px; border:1px solid var(--line); border-radius:10px; font:inherit; outline:none; }
-    .history-file-link {
-  font-size: 13px;
-  font-weight: 750;
-  color: var(--blue);
-  text-decoration: none;
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.history-file-link:hover {
-  text-decoration: underline;
-}
-    .history-toggle-btn {
-  width: 100%;
-  margin-top: 8px;
-  padding: 8px;
-  background: transparent;
-  border: 1px dashed var(--line);
-  border-radius: 10px;
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: .15s;
-}
-.history-toggle-btn:hover {
-  background: var(--soft);
-  color: var(--ink);
-}
+/* Controls & Search */
+.controls-wrap { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.search-wrap { position: relative; width: 100%; }
+.search-wrap input { width: 100%; padding: 11px 14px 11px 38px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; outline: none; background: #fff; color: #0f172a; transition: border-color .15s, box-shadow .15s; }
+.search-wrap input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #94a3b8; pointer-events: none; }
 
-    .modal-actions { display:flex; gap:8px; margin-top:12px; } .modal-actions button { flex:1; min-height:42px; border-radius:10px; border:1px solid var(--line); font-weight:700; cursor:pointer; background:#fff; } .modal-actions .save { background:var(--ink); color:#fff; border-color:var(--ink); }
-    @media (min-width:600px) { body { padding:28px 20px; } .card { padding:28px; } }
-    @media (max-width:380px) { body { padding:10px; } .card { padding:16px; border-radius:17px; } .brand { margin-bottom:17px; } .profile-chip { font-size:11px; padding:6px 8px; } }
-  </style>
+.filters-row { display: flex; align-items: center; gap: 10px; min-width: 0; width: 100%;}
+.filter-group-label { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: .05em; min-width: 80px; flex-shrink: 0; }
+.filters { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; flex-wrap: nowrap; width: 100%; -webkit-overflow-scrolling: touch; }
+.filters::-webkit-scrollbar { display: none; }
+.filter { 
+  flex: 0 0 auto; 
+  padding: 7px 12px; 
+  border-radius: 999px; 
+  font-size: 11px; 
+  font-weight: 700; 
+  border: 1px solid #e2e8f0; 
+  background: #fff; 
+  color: #64748b; 
+  cursor: pointer; 
+  transition: .15s; 
+  white-space: nowrap; 
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.filter.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+.filter-badge { background: #f1f5f9; color: #475569; border-radius: 999px; padding: 2px 6px; font-size: 10px; font-weight: 800; }
+.filter.active .filter-badge { background: #334155; color: #fff; }
+
+/* Job Cards */
+.jobs { display: flex; flex-direction: column; gap: 10px; }
+.job { background: #fff; border-radius: 15px; padding: 14px; border-left: 4px solid #e2e8f0; box-shadow: 0 2px 7px rgba(15,23,42,.05); display: grid; grid-template-columns: auto 44px minmax(0,1fr) auto; gap: 12px; align-items: center; transition: border-color .2s; }
+.job.is-pending { border-left-color: #f59e0b; }
+.job.is-printing { border-left-color: #3b82f6; }
+.job.is-printed { border-left-color: #22c55e; }
+.cb { width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; }
+.icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: #fff7ed; font-size: 21px; }
+.is-printing .icon { background: #eff6ff; }
+.is-printed .icon { background: #f0fdf4; }
+.details { min-width: 0; }
+.customer { font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.filename { font-size: 12px; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.pill { font-size: 10px; font-weight: 750; padding: 4px 8px; border-radius: 999px; background: #f1f5f9; color: #475569; }
+.pending { background: #fff7ed; color: #c2410c; }
+.printing { background: #eff6ff; color: #1d4ed8; }
+.printed { background: #dcfce7; color: #15803d; }
+.price { background: #f5f3ff; color: #6d28d9; }
+.time { color: #94a3b8; background: transparent; font-weight: 500; }
+
+.actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.btn { border: 0; border-radius: 9px; padding: 8px 11px; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; transition: background .15s, opacity .15s; }
+.view { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+.print { background: #2563eb; color: #fff; }
+.print:hover { background: #1d4ed8; }
+.done { background: #16a34a; color: #fff; }
+.done:hover { background: #15803d; }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+
+.empty { text-align: center; background: #fff; border-radius: 15px; padding: 50px 20px; color: #94a3b8; }
+.empty-icon { font-size: 42px; margin-bottom: 10px; }
+
+/* Floating Action Bar */
+.fab { position: fixed; left: 50%; bottom: 16px; transform: translate(-50%,130px); background: #0f172a; color: #fff; border-radius: 16px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 12px 30px rgba(15,23,42,.25); transition: .25s; z-index: 5; }
+.fab.visible { transform: translate(-50%,0); }
+.fab button { border: 0; border-radius: 9px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
+.delete { background: #ef4444; color: #fff; }
+.cancel { background: transparent; color: #cbd5e1; }
+.selectall { font-size: 11px; color: #cbd5e1; display: flex; gap: 6px; align-items: center; white-space: nowrap; cursor: pointer; }
+
+@media(max-width:680px){
+  body { padding: 12px 10px 90px; }
+  .header h1 { font-size: 19px; }
+  .filters-row { flex-direction: row; align-items: center; gap: 8px; }
+  .filter-group-label { min-width: 50px; }
+  .job { grid-template-columns: auto 40px minmax(0,1fr); padding: 12px; gap: 9px; }
+  .icon { width: 40px; height: 40px; }
+  .actions { grid-column: 2 / -1; justify-content: stretch; }
+  .actions .btn { flex: 1; min-height: 40px; }
+  .fab { width: calc(100% - 20px); justify-content: center; }
+}
+</style>
 </head>
 <body>
-<div class="page">
-  <main class="card">
-    <div class="brand">
-      <div class="brand-main"><div class="brand-icon">🖨️</div><div><div class="brand-name">SmartPrint</div><div class="brand-sub">Quick & simple document printing</div></div></div>
+<div class="wrap">
+  <header class="header">
+    <div>
+      <h1>🖨️ Print Dashboard</h1>
+      <p id="syncStatus">Connecting realtime...</p>
+    </div>
+    <span class="count" id="count">Loading...</span>
+  </header>
+
+  <div class="controls-wrap">
+    <!-- Live Search Bar -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search customer name or file..." oninput="onSearchInput()">
     </div>
 
-    <div class="welcome" id="welcome"></div>
-
-    <div class="section-label">Your name</div>
-    <div class="input-wrap">
-      <span class="input-icon">👤</span>
-      <input type="text" id="customerName" maxlength="60" placeholder="Enter your name" autocomplete="name" oninput="checkReady()">
-      <button class="edit-name" id="editNameBtn" type="button" onclick="openNameEditor()">Edit</button>
-    </div>
-
-    <div class="section-label">Upload PDF</div>
-    <div class="upload-area" id="uploadArea">
-      <input type="file" id="fileInput" accept="application/pdf,.pdf" onchange="onFileSelect()">
-      <div class="upload-icon" id="uploadIcon">📄</div>
-      <div class="upload-text" id="uploadText">Tap to choose a PDF</div>
-      <div class="upload-hint" id="uploadHint">PDF files only</div>
-    </div>
-
-    <div class="section-label">Print type</div>
-    <div class="type-toggle">
-      <input type="radio" name="type" id="bw" value="bw" checked onchange="onTypeChange()"><label for="bw">⬛ Black &amp; White<br><small>Rs.2 / page</small></label>
-      <input type="radio" name="type" id="color" value="color" onchange="onTypeChange()"><label for="color">🎨 Color<br><small>Rs.5 / page</small></label>
-    </div>
-
-    <div id="summary" style="display:none">
-      <div class="summary-row"><span>Customer</span><span id="s-customer">—</span></div>
-      <div class="summary-row"><span>File</span><span id="s-file">—</span></div>
-      <div class="summary-row"><span>Pages</span><span id="s-pages">—</span></div>
-      <div class="summary-row"><span>Print type</span><span id="s-type">—</span></div>
-      <div class="summary-row"><span>Price per page</span><span id="s-ppp">—</span></div>
-      <div class="summary-total"><span>Total</span><span id="s-total">Rs.0</span></div>
-    </div>
-
-    <button class="btn-upload" id="uploadBtn" onclick="uploadFile()" disabled>Upload &amp; Print</button>
-    <div id="status"></div>
-
-    <div class="print-status" id="printStatus">
-      <div class="status-head"><div class="status-icon" id="printStatusIcon">⏳</div><div><div class="status-title" id="printStatusTitle">Print status</div><div class="status-text" id="printStatusText">Checking your job...</div></div></div>
-      <div class="status-job"><span id="statusFile">—</span><span id="statusUpdated">—</span></div>
-    </div>
-    
-    <div class="print-history" id="printHistory">
-      <div class="history-heading">
-        <div class="history-title">Print history</div>
-        <div class="history-subtitle" id="historyCount"></div>
+    <!-- Status / Type Filters -->
+    <div class="filters-row">
+      <div class="filter-group-label">Status:</div>
+      <div class="filters">
+        <button class="filter active" id="filter-all" onclick="setFilter('all')">All <span class="filter-badge" id="badge-all">0</span></button>
+        <button class="filter" id="filter-pending" onclick="setFilter('pending')">⏳ Pending <span class="filter-badge" id="badge-pending">0</span></button>
+        <button class="filter" id="filter-printing" onclick="setFilter('printing')">🖨️ Printing <span class="filter-badge" id="badge-printing">0</span></button>
+        <button class="filter" id="filter-printed" onclick="setFilter('printed')">✅ Printed <span class="filter-badge" id="badge-printed">0</span></button>
+        <button class="filter" id="filter-bw" onclick="setFilter('bw')">B&amp;W <span class="filter-badge" id="badge-bw">0</span></button>
+        <button class="filter" id="filter-color" onclick="setFilter('color')">Color <span class="filter-badge" id="badge-color">0</span></button>
       </div>
-      <div class="history-list" id="historyList"></div>
     </div>
 
-    <div class="secondary-actions" id="secondaryActions"><button type="button" onclick="startNewPrint()">＋ New print</button><button type="button" onclick="openNameEditor()">✏️ Edit name</button></div>
-    
-  </main>
-</div>
+    <!-- Date Range Filters -->
+    <div class="filters-row">
+      <div class="filter-group-label">Date:</div>
+      <div class="filters">
+        <button class="filter date-filter active" id="date-all" onclick="setDateFilter('all')">All Time</button>
+        <button class="filter date-filter" id="date-today" onclick="setDateFilter('today')">Today</button>
+        <button class="filter date-filter" id="date-yesterday" onclick="setDateFilter('yesterday')">Yesterday</button>
+        <button class="filter date-filter" id="date-week" onclick="setDateFilter('week')">This Week</button>
+      </div>
+    </div>
+  </div>
 
-<div class="modal-backdrop" id="nameModal" onclick="if(event.target===this)closeNameEditor()">
-  <div class="modal">
-    <h3>Edit your name</h3><p>This name is used on your print records.</p>
-    <input id="nameEditor" maxlength="60" placeholder="Enter your name" autocomplete="name">
-    <div class="modal-actions"><button type="button" onclick="closeNameEditor()">Cancel</button><button class="save" type="button" onclick="saveName()">Save</button></div>
+  <div id="jobs" class="jobs">
+    <div class="empty"><div class="empty-icon">⏳</div><p>Loading jobs...</p></div>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<div class="fab" id="fab">
+  <span id="fabCount">0 selected</span>
+  <label class="selectall"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"> Select all</label>
+  <button class="delete" onclick="deleteSelected()">🗑️ Delete</button>
+  <button class="cancel" onclick="clearSelection()">Cancel</button>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
-
-let historyExpanded = false;
-let cachedHistoryJobs = [];
-  
 const SUPABASE_URL = "https://hommwwdjqzkcoxheerxl.supabase.co";
-const SUPABASE_KEY = "sb_publishable_muM1Xml6MpBwct6-kpvZXg_ejuz9Z8V";
-const BW_PRICE = 2, COLOR_PRICE = 5;
-const MAX_FILE_SIZE = 25 * 1024 * 1024;
-const DEVICE_KEY = "smartprint_device_id_v1";
-const NAME_KEY = "smartprint_customer_name_v1";
-const JOB_KEY = "smartprint_last_job_id_v1";
-let selectedFile = null, pageCount = 0, printType = "bw", readingPDF = false, currentJobId = null, statusCheckInterval = null;
-const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_muM1Xml6MpBwct6-kpvZXg_ejuz9Z8V";
 
-function getDeviceId() {
-  let id = localStorage.getItem(DEVICE_KEY);
-  if (!id) { id = (crypto.randomUUID ? crypto.randomUUID() : fallbackId()); localStorage.setItem(DEVICE_KEY, id); }
-  return id;
-}
-function fallbackId() { return "sp-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,12); }
-const deviceId = getDeviceId();
+const client = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+  
+let currentFilter = "all";
+let currentDateFilter = "all";
+let searchQuery = "";
+let searchTimeout = null;
 
-function setStatus(msg, type) { const el=document.getElementById("status"); el.textContent=msg; el.className=type||""; }
-function setWelcome() { const name=localStorage.getItem(NAME_KEY)||""; const input=document.getElementById("customerName"); input.value=name; input.className=name?"filled":""; document.getElementById("welcome").textContent=name?`Welcome back, ${name} 👋`:""; document.getElementById("welcome").classList.toggle("show",!!name); }
-function openNameEditor(){ document.getElementById("nameEditor").value=document.getElementById("customerName").value.trim(); document.getElementById("nameModal").classList.add("show"); setTimeout(()=>document.getElementById("nameEditor").focus(),50); }
-function closeNameEditor(){ document.getElementById("nameModal").classList.remove("show"); }
-function saveName(){ const name=document.getElementById("nameEditor").value.trim(); if(!name){ alert("Please enter your name."); return; } localStorage.setItem(NAME_KEY,name); document.getElementById("customerName").value=name; document.getElementById("customerName").className="filled"; setWelcome(); updateSummary(); checkReady(); closeNameEditor(); }
-function checkReady(){ const name=document.getElementById("customerName").value.trim(); const input=document.getElementById("customerName"); input.className=name?"filled":""; const ready=name && selectedFile && pageCount>0 && !readingPDF; document.getElementById("uploadBtn").disabled=!ready; if(ready) updateSummary(); }
-function updateSummary(){ const name=document.getElementById("customerName").value.trim(); if(!selectedFile||!pageCount||!name)return; const p=printType==="color"?COLOR_PRICE:BW_PRICE, total=pageCount*p, kb=Math.round(selectedFile.size/1024); const size=kb>1024?(kb/1024).toFixed(1)+" MB":kb+" KB"; document.getElementById("s-customer").textContent=name; document.getElementById("s-file").textContent=selectedFile.name+" ("+size+")"; document.getElementById("s-pages").textContent=pageCount; document.getElementById("s-type").textContent=printType==="color"?"Color":"Black & White"; document.getElementById("s-ppp").textContent="Rs."+p; document.getElementById("s-total").textContent="Rs."+total; document.getElementById("summary").style.display="block"; }
-function onTypeChange(){ printType=document.querySelector('input[name="type"]:checked').value; if(pageCount)updateSummary(); }
-
-async function onFileSelect() {
-  const file = document.getElementById("fileInput").files[0];
-  selectedFile = file || null;
-  pageCount = 0;
-  readingPDF = false;
-
-  if (!file) {
-    resetFileUI();
-    checkReady();
-    return;
-  }
-
-  if (file.size > MAX_FILE_SIZE) {
-    setStatus("File is too large. Max size is 25MB.", "error");
-    resetFileUI();
-    checkReady();
-    return;
-  }
-
-  readingPDF = true;
-  document.getElementById("uploadArea").classList.add("loading");
-
-  try {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    pageCount = pdf.numPages;
-    
-    document.getElementById("uploadArea").classList.remove("loading");
-    document.getElementById("uploadArea").classList.add("has-file");
-    document.getElementById("uploadIcon").textContent = "✓";
-    document.getElementById("uploadText").textContent = file.name;
-    document.getElementById("uploadHint").textContent = `${pageCount} page${pageCount !== 1 ? "s" : ""}`;
-    
-    readingPDF = false;
-    checkReady();
-  } catch (err) {
-    console.error("PDF reading error:", err);
-    setStatus("Could not read PDF file. Please try another file.", "error");
-    resetFileUI();
-    readingPDF = false;
-  }
+function esc(v) {
+  return String(v??"").replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 }
 
-function resetFileUI(clearInput=true){ selectedFile=null; pageCount=0; readingPDF=false; if(clearInput)document.getElementById("fileInput").value=""; document.getElementById("uploadArea").className="upload-area"; document.getElementById("uploadIcon").textContent="📄"; document.getElementById("uploadText").textContent="Tap to choose a PDF"; document.getElementById("uploadHint").textContent="PDF files only"; document.getElementById("summary").style.display="none"; document.getElementById("uploadBtn").disabled=true; }
-
-function normalizeStatus(status) {
-  if (status === "done") return "printed";
-  return status || "pending";
-}
-
-function getStatusInfo(status) {
-  status = normalizeStatus(status);
-  const map = {
-    pending: { icon: "⏳", title: "Print pending", text: "Your document is waiting to be printed." },
-    printing: { icon: "🖨️", title: "Printing", text: "Your document is currently being printed." },
-    printed: { icon: "✅", title: "Printed successfully", text: "Your document has been printed." },
-    failed: { icon: "⚠️", title: "Print failed", text: "We could not complete this print job." }
-  };
-  return map[status] || { icon: "⏳", title: "Checking status", text: "Checking your print job..." };
-}
-
-// Helper function to reliably parse Supabase UTC strings into local Date objects
 function parseDate(dateValue) {
   if (!dateValue) return null;
   if (dateValue instanceof Date) return dateValue;
 
   let str = String(dateValue).trim().replace(" ", "T");
-
-  // If the string lacks a timezone offset or 'Z', append 'Z' so JS treats it as UTC
   if (!str.endsWith("Z") && !/[+-]\d{2}:?\d{2}$/.test(str)) {
     str += "Z";
   }
@@ -308,307 +185,273 @@ function parseDate(dateValue) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function formatTime(dateValue) {
-  const date = parseDate(dateValue);
+function formatTime(d) {
+  const date = parseDate(d);
   if (!date) return "";
 
-  return date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true
-  });
+  const now = new Date();
+  const mins = Math.max(0, Math.floor((now - date) / 60000));
+  const ago = mins < 1 ? "just now" : mins < 60 ? mins + "m ago" : mins < 1440 ? Math.floor(mins / 60) + "h ago" : Math.floor(mins / 1440) + "d ago";
+  const t = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+  const ds = date.toLocaleDateString([], { day: "numeric", month: "short" });
+
+  return (now.toDateString() === date.toDateString() ? t : ds + " " + t) + " · " + ago;
 }
 
-function formatDate(dateValue) {
-  const date = parseDate(dateValue);
-  if (!date) return "";
+function setFilter(type) {
+  currentFilter = type;
+  document.querySelectorAll(".filters .filter:not(.date-filter)").forEach(b => b.classList.remove("active"));
+  document.getElementById("filter-" + type).classList.add("active");
+  clearSelection();
+  loadJobs();
+}
 
-  const today = new Date();
-  if (date.toDateString() === today.toDateString()) {
-    return formatTime(date);
+function setDateFilter(range) {
+  currentDateFilter = range;
+  document.querySelectorAll(".date-filter").forEach(b => b.classList.remove("active"));
+  document.getElementById("date-" + range).classList.add("active");
+  clearSelection();
+  loadJobs();
+}
+
+function onSearchInput() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    searchQuery = document.getElementById("searchInput").value.trim().toLowerCase();
+    loadJobs();
+  }, 200);
+}
+
+function getChecked() { return document.querySelectorAll(".job-cb:checked"); }
+
+function syncFab() {
+  const c = getChecked().length;
+  document.getElementById("fab").classList.toggle("visible", c > 0);
+  document.getElementById("fabCount").textContent = c + " selected";
+  const all = document.querySelectorAll(".job-cb");
+  const sa = document.getElementById("selectAll");
+  sa.checked = all.length > 0 && c === all.length;
+  sa.indeterminate = c > 0 && c < all.length;
+}
+
+function toggleSelectAll() {
+  const v = document.getElementById("selectAll").checked;
+  document.querySelectorAll(".job-cb").forEach(cb => cb.checked = v);
+  syncFab();
+}
+
+function clearSelection() {
+  document.querySelectorAll(".job-cb").forEach(cb => cb.checked = false);
+  document.getElementById("selectAll").checked = false;
+  document.getElementById("fab").classList.remove("visible");
+}
+
+function getStoragePathFromUrl(fileUrl) {
+  if (!fileUrl) return null;
+  try {
+    const match = fileUrl.match(/\/print-files\/(.+)$/);
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function deleteSelected() {
+  const checked = getChecked();
+  if (!checked.length) return;
+  if (!confirm("Delete " + checked.length + " job(s)? This permanently removes database records and PDF files from storage.")) return;
+
+  const ids = Array.from(checked).map(cb => cb.dataset.id);
+  const storagePaths = Array.from(checked)
+    .map(cb => getStoragePathFromUrl(cb.dataset.url))
+    .filter(Boolean);
+
+  if (storagePaths.length > 0) {
+    await client.storage.from("print-files").remove(storagePaths);
   }
 
-  return (
-    date.toLocaleDateString([], {
-      day: "numeric",
-      month: "short"
-    }) +
-    " · " +
-    formatTime(date)
-  );
-}
+  const { error: dbError } = await client.from("print_jobs").delete().in("id", ids);
 
-
-function escapeHtml(value) {
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function updatePrintStatus(status, fileName, updatedAt) {
-  status = normalizeStatus(status);
-  const box = document.getElementById("printStatus");
-  box.className = "print-status show status-" + status;
-
-  const info = getStatusInfo(status);
-  document.getElementById("printStatusIcon").textContent = info.icon;
-  document.getElementById("printStatusTitle").textContent = info.title;
-  document.getElementById("printStatusText").textContent = info.text;
-  document.getElementById("statusFile").textContent = fileName || "Print job";
-  document.getElementById("statusUpdated").textContent = formatTime(updatedAt);
-  document.getElementById("secondaryActions").classList.toggle("show", status === "printed");
-}
-
-function toggleHistoryExpand() {
-  historyExpanded = !historyExpanded;
-  renderHistory(cachedHistoryJobs);
-}
-
-function renderHistory(jobs) {
-  cachedHistoryJobs = jobs || [];
-
-  const historyBox = document.getElementById("printHistory");
-  const historyList = document.getElementById("historyList");
-  const historyCount = document.getElementById("historyCount");
-
-  const historyJobs = cachedHistoryJobs.filter(job => job.id !== currentJobId);
-
-  if (!historyJobs.length) {
-    historyBox.classList.remove("show");
-    historyList.innerHTML = "";
-    historyCount.textContent = "";
+  if (dbError) {
+    alert("Delete failed: " + dbError.message);
     return;
   }
 
-  historyBox.classList.add("show");
-  historyCount.textContent = historyJobs.length + (historyJobs.length === 1 ? " print" : " prints");
-
-  // Show top 3 by default
-  const LIMIT = 3;
-  const displayJobs = historyExpanded ? historyJobs : historyJobs.slice(0, LIMIT);
-
-  historyList.innerHTML = displayJobs.map(job => {
-    const status = normalizeStatus(job.status);
-    const info = getStatusInfo(status);
-    const printType = job.print_type === "color" ? "Color" : "B&W";
-    const price = job.price !== null && job.price !== undefined ? `₹${job.price}` : "";
-
-    const fileLink = job.file_url 
-      ? `<a href="${escapeHtml(job.file_url)}" target="_blank" rel="noopener noreferrer" class="history-file-link" title="Open PDF">${escapeHtml(job.file_name || "Untitled PDF")} ↗</a>`
-      : `<div class="history-file" title="${escapeHtml(job.file_name)}">${escapeHtml(job.file_name || "Untitled PDF")}</div>`;
-
-    return `
-      <div class="history-item">
-        <div class="history-item-icon">${info.icon}</div>
-        <div class="history-item-main">
-          ${fileLink}
-          <div class="history-meta">
-            <span>${formatDate(job.updated_at || job.created_at)}</span>
-            ${job.pages ? `<span>·</span><span>${job.pages} page${job.pages === 1 ? "" : "s"}</span>` : ""}
-            <span>·</span><span>${printType}</span>
-            ${price ? `<span>·</span><span>${price}</span>` : ""}
-          </div>
-        </div>
-        <div class="history-status ${status}">
-          ${status === "pending" ? "Pending" : status === "printing" ? "Printing" : status === "printed" ? "Printed" : "Failed"}
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  // Handle See all / Show less button
-  let toggleBtn = document.getElementById("historyToggleBtn");
-  if (historyJobs.length > LIMIT) {
-    if (!toggleBtn) {
-      toggleBtn = document.createElement("button");
-      toggleBtn.id = "historyToggleBtn";
-      toggleBtn.className = "history-toggle-btn";
-      toggleBtn.type = "button";
-      toggleBtn.onclick = toggleHistoryExpand;
-      historyBox.appendChild(toggleBtn);
-    }
-    toggleBtn.style.display = "block";
-    toggleBtn.textContent = historyExpanded 
-      ? "Show less ↑" 
-      : `See all (${historyJobs.length}) ↓`;
-  } else if (toggleBtn) {
-    toggleBtn.style.display = "none";
-  }
+  clearSelection();
+  loadJobs();
 }
 
-async function loadPrintHistory() {
-  const { data, error } = await client
-    .from("print_jobs")
-    .select(`id, status, file_name, file_url, pages, print_type, price, created_at`)
-    .eq("device_id", deviceId)
-    .order("created_at", { ascending: false });
+async function markDone(id) {
+  const { error } = await client.from("print_jobs").update({ status: "printed" }).eq("id", id);
+  if (error) { alert("Error: " + error.message); return; }
+  loadJobs();
+}
 
+async function printJob(id, url) {
+  // 1. Open window synchronously to avoid browser popup blockers
+  const win = window.open(url, "_blank");
+  if (!win) {
+    alert("Please allow popups for this site to open and print PDFs.");
+    return;
+  }
+
+  // 2. Transition status from 'pending' to 'printing'
+  const { error } = await client.from("print_jobs").update({ status: "printing" }).eq("id", id);
+  
   if (error) {
-    console.warn("Could not load print history:", error.message);
-    return [];
-  }
-  return data || [];
-}
-
-async function checkPrintStatus() {
-  if (!currentJobId) return;
-
-  const { data, error } = await client
-    .from("print_jobs")
-    .select(`id, status, file_name, created_at, pages, print_type, price`)
-    .eq("id", currentJobId)
-    .eq("device_id", deviceId)
-    .maybeSingle();
-
-  if (error || !data) return;
-
-  const status = normalizeStatus(data.status);
-  updatePrintStatus(status, data.file_name, data.created_at);
-
-  const jobs = await loadPrintHistory();
-  renderHistory(jobs);
-
-  if (status === "printed" || status === "failed") stopPolling();
-}
-
-function startPolling() {
-  stopPolling();
-  checkPrintStatus();
-  statusCheckInterval = setInterval(checkPrintStatus, 3000);
-}
-
-function stopPolling() {
-  if (statusCheckInterval) {
-    clearInterval(statusCheckInterval);
-    statusCheckInterval = null;
-  }
-}
-
-async function restorePrintState() {
-  const jobs = await loadPrintHistory();
-
-  if (!jobs.length) {
-    currentJobId = null;
-    document.getElementById("printStatus").className = "print-status";
-    document.getElementById("secondaryActions").classList.remove("show");
-    renderHistory([]);
-    return;
-  }
-
-  // Check if there is an active print job in progress (pending or printing)
-  const activeJob = jobs.find(job => {
-    const status = normalizeStatus(job.status);
-    return status === "pending" || status === "printing";
-  });
-
-  if (activeJob) {
-    // Keep showing live status for ongoing jobs
-    currentJobId = activeJob.id;
-    localStorage.setItem(JOB_KEY, currentJobId);
-    updatePrintStatus(normalizeStatus(activeJob.status), activeJob.file_name, activeJob.created_at);
-    renderHistory(jobs);
-    startPolling();
+    console.warn("Could not update status to printing:", error.message);
   } else {
-    // All jobs are finished/printed: move everything to History & clear active status box
-    currentJobId = null;
-    localStorage.removeItem(JOB_KEY);
-    document.getElementById("printStatus").className = "print-status";
-    document.getElementById("secondaryActions").classList.remove("show");
-    renderHistory(jobs);
-    stopPolling();
+    // Automatically switch view tab to 'printing' so the user follows the print workflow
+    if (currentFilter === "pending") {
+      setFilter("printing");
+    } else {
+      loadJobs();
+    }
   }
-}
-
-
-async function uploadFile() {
-  const btn = document.getElementById("uploadBtn");
-  const name = document.getElementById("customerName").value.trim();
-
-  if (!selectedFile || !name || pageCount <= 0) {
-    setStatus("Please select a valid file and enter your name.", "error");
-    return;
-  }
-
-  localStorage.setItem(NAME_KEY, name);
-  btn.disabled = true;
-  btn.textContent = "Uploading...";
-  setStatus("Uploading your PDF, please wait...", "info");
 
   try {
-    const fileName = Date.now() + "_" + Math.random().toString(36).slice(2, 8) + "_" + selectedFile.name;
-
-    const { error: uploadError } = await client.storage
-      .from("print-files")
-      .upload(fileName, selectedFile, { contentType: "application/pdf", upsert: false });
-
-    if (uploadError) throw new Error("Upload failed: " + uploadError.message);
-
-    const { data: urlData, error: urlError } = client.storage
-      .from("print-files")
-      .getPublicUrl(fileName);
-
-    if (urlError || !urlData?.publicUrl) throw new Error("Could not get file URL");
-
-    const total = pageCount * (printType === "color" ? COLOR_PRICE : BW_PRICE);
-
-    const { data: jobData, error: dbError } = await client
-      .from("print_jobs")
-      .insert([{
-        customer_name: name,
-        device_id: deviceId,
-        file_name: selectedFile.name,
-        file_url: urlData.publicUrl,
-        pages: pageCount,
-        print_type: printType,
-        price: total,
-        status: "pending"
-      }])
-      .select("id, status, file_name, created_at")
-      .single();
-
-    if (dbError) throw new Error("Database error: " + dbError.message);
-
-    currentJobId = jobData.id;
-    localStorage.setItem(JOB_KEY, currentJobId);
-
-    setStatus("Your PDF has been uploaded successfully.", "success");
-    updatePrintStatus("pending", jobData.file_name, jobData.created_at);
-
-    btn.textContent = "Uploaded ✓";
-    document.getElementById("summary").style.display = "none";
-    resetFileUI();
-
-    const jobs = await loadPrintHistory();
-    renderHistory(jobs);
-    startPolling();
-
-  } catch (err) {
-    console.error("Upload error:", err);
-    setStatus(err.message || "Something went wrong.", "error");
-    btn.disabled = false;
-    btn.textContent = "Upload & Print";
+    win.onload = () => setTimeout(() => win.print(), 600);
+  } catch (e) {
+    console.warn("Popup print handler attached.");
   }
 }
 
-function startNewPrint() {
-  stopPolling();
-  currentJobId = null;
-  document.getElementById("printStatus").className = "print-status";
-  document.getElementById("secondaryActions").classList.remove("show");
-  setStatus("", "");
-  resetFileUI();
-  document.getElementById("uploadBtn").textContent = "Upload & Print";
-  document.getElementById("customerName").value = localStorage.getItem(NAME_KEY) || "";
-  checkReady();
-  loadPrintHistory();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+function updateBadges(allData) {
+  const counts = {
+    all: allData.length,
+    pending: allData.filter(j => (j.status || "pending") === "pending").length,
+    printing: allData.filter(j => j.status === "printing").length,
+    printed: allData.filter(j => j.status === "printed").length,
+    bw: allData.filter(j => j.print_type === "bw").length,
+    color: allData.filter(j => j.print_type === "color").length
+  };
+
+  document.getElementById("badge-all").textContent = counts.all;
+  document.getElementById("badge-pending").textContent = counts.pending;
+  document.getElementById("badge-printing").textContent = counts.printing;
+  document.getElementById("badge-printed").textContent = counts.printed;
+  document.getElementById("badge-bw").textContent = counts.bw;
+  document.getElementById("badge-color").textContent = counts.color;
 }
 
-setWelcome();
-restorePrintState();
+async function loadJobs() {
+  const selected = new Set(Array.from(document.querySelectorAll(".job-cb:checked")).map(cb => cb.dataset.id));
+  
+  // 1. Query total job set for badges
+  let baseQuery = client.from("print_jobs").select("*").order("created_at", { ascending: false });
+
+  const now = new Date();
+  if (currentDateFilter === "today") {
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    baseQuery = baseQuery.gte("created_at", startOfDay);
+  } else if (currentDateFilter === "yesterday") {
+    const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString();
+    const endOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    baseQuery = baseQuery.gte("created_at", startOfYesterday).lt("created_at", endOfYesterday);
+  } else if (currentDateFilter === "week") {
+    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString();
+    baseQuery = baseQuery.gte("created_at", startOfWeek);
+  }
+
+  const { data, error } = await baseQuery;
+  const c = document.getElementById("jobs");
+
+  if (error) {
+    c.innerHTML = '<div class="empty"><div class="empty-icon">⚠️️</div><p>' + esc(error.message) + '</p></div>';
+    return;
+  }
+
+  const rawList = data || [];
+  updateBadges(rawList);
+
+  // 2. Filter list by selected status/type tab & search query
+  const filteredData = rawList.filter(job => {
+    const s = job.status || "pending";
+    if (currentFilter !== "all") {
+      if (["pending", "printing", "printed"].includes(currentFilter) && s !== currentFilter) return false;
+      if (["bw", "color"].includes(currentFilter) && job.print_type !== currentFilter) return false;
+    }
+
+    if (searchQuery) {
+      const name = (job.customer_name || "").toLowerCase();
+      const file = (job.file_name || "").toLowerCase();
+      if (!name.includes(searchQuery) && !file.includes(searchQuery)) return false;
+    }
+
+    return true;
+  });
+
+  document.getElementById("count").textContent = filteredData.length + " job(s)";
+
+  if (!filteredData.length) {
+    c.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>' + (searchQuery || currentDateFilter !== 'all' || currentFilter !== 'all' ? 'No matching print jobs found.' : 'No print jobs yet.') + '</p></div>';
+    return;
+  }
+
+  c.innerHTML = filteredData.map(job => {
+    const s = job.status || "pending",
+          printed = s === "printed",
+          printing = s === "printing",
+          type = job.print_type === "color" ? "Color" : "B&W",
+          customer = job.customer_name || "Unknown",
+          pages = job.pages ? job.pages + " pg" : "",
+          price = job.price ? "Rs." + job.price : "",
+          cls = printed ? "is-printed" : printing ? "is-printing" : "is-pending",
+          icon = printed ? "✅" : printing ? "🖨️" : "⏳",
+          pill = printed ? "printed" : printing ? "printing" : "pending",
+          label = printed ? "✅ Printed" : printing ? "🖨️ Printing" : "⏳ Pending";
+
+    return `<div class="job ${cls}" id="job-${esc(job.id)}">
+      <input class="cb job-cb" type="checkbox" data-id="${esc(job.id)}" data-url="${esc(job.file_url)}" onchange="syncFab()">
+      <div class="icon">${icon}</div>
+      <div class="details">
+        <div class="customer">👤 ${esc(customer)}</div>
+        <div class="filename">📎 ${esc(job.file_name)}</div>
+        <div class="meta">
+          <span class="pill ${pill}">${label}</span>
+          ${pages ? `<span class="pill">${esc(pages)}</span>` : ""}
+          <span class="pill">${type}</span>
+          ${price ? `<span class="pill price">${esc(price)}</span>` : ""}
+          ${job.created_at ? `<span class="pill time">${formatTime(job.created_at)}</span>` : ""}
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn view" href="${esc(job.file_url)}" target="_blank" rel="noopener">View</a>
+        ${!printed ? `
+          <button class="btn print" onclick="printJob('${esc(job.id)}','${esc(job.file_url)}')">${printing ? "🖨️ Re-Print" : "🖨️ Print"}</button>
+          <button class="btn done" onclick="markDone('${esc(job.id)}')">✔ Done</button>
+        ` : ""}
+      </div>
+    </div>`;
+  }).join("");
+
+  if (selected.size) {
+    document.querySelectorAll(".job-cb").forEach(cb => {
+      if (selected.has(cb.dataset.id)) cb.checked = true;
+    });
+    syncFab();
+  }
+}
+
+function initRealtime() {
+  client
+    .channel("dashboard-changes")
+    .on("postgres_changes", { event: "*", schema: "public", table: "print_jobs" }, () => {
+      loadJobs();
+    })
+    .subscribe((status) => {
+      const syncEl = document.getElementById("syncStatus");
+      if (status === "SUBSCRIBED") {
+        syncEl.textContent = "Live connected (Realtime)";
+      } else {
+        syncEl.textContent = "Auto-refreshes every 10s";
+      }
+    });
+}
+
+loadJobs();
+initRealtime();
+setInterval(loadJobs, 10000);
 </script>
 </body>
 </html>
