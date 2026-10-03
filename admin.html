@@ -37,17 +37,22 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", 
   cursor: pointer; 
   transition: .15s; 
   white-space: nowrap; 
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 .filter.active { background: #0f172a; color: #fff; border-color: #0f172a; }
+.filter-badge { background: #f1f5f9; color: #475569; border-radius: 999px; padding: 2px 6px; font-size: 10px; font-weight: 800; }
+.filter.active .filter-badge { background: #334155; color: #fff; }
 
 /* Job Cards */
 .jobs { display: flex; flex-direction: column; gap: 10px; }
-.job { background: #fff; border-radius: 15px; padding: 14px; border-left: 4px solid #e2e8f0; box-shadow: 0 2px 7px rgba(15,23,42,.05); display: grid; grid-template-columns: auto 44px minmax(0,1fr) auto; gap: 12px; align-items: center; }
+.job { background: #fff; border-radius: 15px; padding: 14px; border-left: 4px solid #e2e8f0; box-shadow: 0 2px 7px rgba(15,23,42,.05); display: grid; grid-template-columns: auto 44px minmax(0,1fr) auto; gap: 12px; align-items: center; transition: border-color .2s; }
 .job.is-pending { border-left-color: #f59e0b; }
 .job.is-printing { border-left-color: #3b82f6; }
 .job.is-printed { border-left-color: #22c55e; }
 .cb { width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; }
-.icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: #eff6ff; font-size: 21px; }
+.icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: #fff7ed; font-size: 21px; }
 .is-printing .icon { background: #eff6ff; }
 .is-printed .icon { background: #f0fdf4; }
 .details { min-width: 0; }
@@ -62,10 +67,12 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", 
 .time { color: #94a3b8; background: transparent; font-weight: 500; }
 
 .actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-.btn { border: 0; border-radius: 9px; padding: 8px 11px; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+.btn { border: 0; border-radius: 9px; padding: 8px 11px; font-size: 12px; font-weight: 800; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; transition: background .15s, opacity .15s; }
 .view { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
 .print { background: #2563eb; color: #fff; }
+.print:hover { background: #1d4ed8; }
 .done { background: #16a34a; color: #fff; }
+.done:hover { background: #15803d; }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
 
 .empty { text-align: center; background: #fff; border-radius: 15px; padding: 50px 20px; color: #94a3b8; }
@@ -97,7 +104,7 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", 
   <header class="header">
     <div>
       <h1>🖨️ Print Dashboard</h1>
-      <p>Auto-refreshes every 5 seconds</p>
+      <p id="syncStatus">Connecting realtime...</p>
     </div>
     <span class="count" id="count">Loading...</span>
   </header>
@@ -113,12 +120,12 @@ body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", 
     <div class="filters-row">
       <div class="filter-group-label">Status:</div>
       <div class="filters">
-        <button class="filter active" id="filter-all" onclick="setFilter('all')">All</button>
-        <button class="filter" id="filter-pending" onclick="setFilter('pending')">⏳ Pending</button>
-        <button class="filter" id="filter-printing" onclick="setFilter('printing')">🖨️ Printing</button>
-        <button class="filter" id="filter-printed" onclick="setFilter('printed')">✅ Printed</button>
-        <button class="filter" id="filter-bw" onclick="setFilter('bw')">B&amp;W</button>
-        <button class="filter" id="filter-color" onclick="setFilter('color')">Color</button>
+        <button class="filter active" id="filter-all" onclick="setFilter('all')">All <span class="filter-badge" id="badge-all">0</span></button>
+        <button class="filter" id="filter-pending" onclick="setFilter('pending')">⏳ Pending <span class="filter-badge" id="badge-pending">0</span></button>
+        <button class="filter" id="filter-printing" onclick="setFilter('printing')">🖨️ Printing <span class="filter-badge" id="badge-printing">0</span></button>
+        <button class="filter" id="filter-printed" onclick="setFilter('printed')">✅ Printed <span class="filter-badge" id="badge-printed">0</span></button>
+        <button class="filter" id="filter-bw" onclick="setFilter('bw')">B&amp;W <span class="filter-badge" id="badge-bw">0</span></button>
+        <button class="filter" id="filter-color" onclick="setFilter('color')">Color <span class="filter-badge" id="badge-color">0</span></button>
       </div>
     </div>
 
@@ -159,12 +166,12 @@ const client = window.supabase.createClient(
 let currentFilter = "all";
 let currentDateFilter = "all";
 let searchQuery = "";
+let searchTimeout = null;
 
 function esc(v) {
   return String(v??"").replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 }
 
-// Safely parse UTC timestamp from Supabase into local Date
 function parseDate(dateValue) {
   if (!dateValue) return null;
   if (dateValue instanceof Date) return dateValue;
@@ -208,35 +215,11 @@ function setDateFilter(range) {
 }
 
 function onSearchInput() {
-  searchQuery = document.getElementById("searchInput").value.trim().toLowerCase();
-  loadJobs();
-}
-
-function matchesDateRange(jobDateStr, range) {
-  if (range === "all") return true;
-  const date = parseDate(jobDateStr);
-  if (!date) return false;
-
-  const today = new Date();
-  const targetDate = new Date(date);
-
-  if (range === "today") {
-    return targetDate.toDateString() === today.toDateString();
-  }
-
-  if (range === "yesterday") {
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
-    return targetDate.toDateString() === yesterday.toDateString();
-  }
-
-  if (range === "week") {
-    const diffTime = Math.abs(today - targetDate);
-    const diffDays = diffTime / (1000 * 60 * 60 * 24);
-    return diffDays <= 7;
-  }
-
-  return true;
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    searchQuery = document.getElementById("searchInput").value.trim().toLowerCase();
+    loadJobs();
+  }, 200);
 }
 
 function getChecked() { return document.querySelectorAll(".job-cb:checked"); }
@@ -263,7 +246,6 @@ function clearSelection() {
   document.getElementById("fab").classList.remove("visible");
 }
 
-// Extract filename from Supabase public URL for storage cleanup
 function getStoragePathFromUrl(fileUrl) {
   if (!fileUrl) return null;
   try {
@@ -277,31 +259,18 @@ function getStoragePathFromUrl(fileUrl) {
 async function deleteSelected() {
   const checked = getChecked();
   if (!checked.length) return;
-  if (!confirm("Delete " + checked.length + " job(s)? This will permanently remove both database records and PDF files from storage.")) return;
+  if (!confirm("Delete " + checked.length + " job(s)? This permanently removes database records and PDF files from storage.")) return;
 
   const ids = Array.from(checked).map(cb => cb.dataset.id);
-
-  // Extract storage file paths
   const storagePaths = Array.from(checked)
     .map(cb => getStoragePathFromUrl(cb.dataset.url))
     .filter(Boolean);
 
-  // 1. Delete files from Supabase Storage
   if (storagePaths.length > 0) {
-    const { error: storageError } = await client.storage
-      .from("print-files")
-      .remove(storagePaths);
-
-    if (storageError) {
-      console.warn("Storage cleanup warning:", storageError.message);
-    }
+    await client.storage.from("print-files").remove(storagePaths);
   }
 
-  // 2. Delete database records
-  const { error: dbError } = await client
-    .from("print_jobs")
-    .delete()
-    .in("id", ids);
+  const { error: dbError } = await client.from("print_jobs").delete().in("id", ids);
 
   if (dbError) {
     alert("Delete failed: " + dbError.message);
@@ -319,43 +288,94 @@ async function markDone(id) {
 }
 
 async function printJob(id, url) {
-  const { error } = await client.from("print_jobs").update({ status: "printing" }).eq("id", id);
-  if (error) { alert("Could not update status: " + error.message); return; }
-  loadJobs();
+  // 1. Open window synchronously to avoid browser popup blockers
   const win = window.open(url, "_blank");
-  if (!win) { alert("Please allow popups to print."); return; }
-  win.onload = () => setTimeout(() => win.print(), 600);
+  if (!win) {
+    alert("Please allow popups for this site to open and print PDFs.");
+    return;
+  }
+
+  // 2. Transition status from 'pending' to 'printing'
+  const { error } = await client.from("print_jobs").update({ status: "printing" }).eq("id", id);
+  
+  if (error) {
+    console.warn("Could not update status to printing:", error.message);
+  } else {
+    // Automatically switch view tab to 'printing' so the user follows the print workflow
+    if (currentFilter === "pending") {
+      setFilter("printing");
+    } else {
+      loadJobs();
+    }
+  }
+
+  try {
+    win.onload = () => setTimeout(() => win.print(), 600);
+  } catch (e) {
+    console.warn("Popup print handler attached.");
+  }
+}
+
+function updateBadges(allData) {
+  const counts = {
+    all: allData.length,
+    pending: allData.filter(j => (j.status || "pending") === "pending").length,
+    printing: allData.filter(j => j.status === "printing").length,
+    printed: allData.filter(j => j.status === "printed").length,
+    bw: allData.filter(j => j.print_type === "bw").length,
+    color: allData.filter(j => j.print_type === "color").length
+  };
+
+  document.getElementById("badge-all").textContent = counts.all;
+  document.getElementById("badge-pending").textContent = counts.pending;
+  document.getElementById("badge-printing").textContent = counts.printing;
+  document.getElementById("badge-printed").textContent = counts.printed;
+  document.getElementById("badge-bw").textContent = counts.bw;
+  document.getElementById("badge-color").textContent = counts.color;
 }
 
 async function loadJobs() {
   const selected = new Set(Array.from(document.querySelectorAll(".job-cb:checked")).map(cb => cb.dataset.id));
-  let q = client.from("print_jobs").select("*").order("created_at", { ascending: false });
+  
+  // 1. Query total job set for badges
+  let baseQuery = client.from("print_jobs").select("*").order("created_at", { ascending: false });
 
-  if (currentFilter !== "all") {
-    if (["pending", "printing", "printed"].includes(currentFilter)) q = q.eq("status", currentFilter);
-    else if (["bw", "color"].includes(currentFilter)) q = q.eq("print_type", currentFilter);
+  const now = new Date();
+  if (currentDateFilter === "today") {
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    baseQuery = baseQuery.gte("created_at", startOfDay);
+  } else if (currentDateFilter === "yesterday") {
+    const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString();
+    const endOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    baseQuery = baseQuery.gte("created_at", startOfYesterday).lt("created_at", endOfYesterday);
+  } else if (currentDateFilter === "week") {
+    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString();
+    baseQuery = baseQuery.gte("created_at", startOfWeek);
   }
 
-  const { data, error } = await q;
+  const { data, error } = await baseQuery;
   const c = document.getElementById("jobs");
 
   if (error) {
-    c.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div><p>' + esc(error.message) + '</p></div>';
+    c.innerHTML = '<div class="empty"><div class="empty-icon">⚠️️</div><p>' + esc(error.message) + '</p></div>';
     return;
   }
 
-  // Apply Date Range and Search Filter locally
-  const filteredData = (data || []).filter(job => {
-    // Check Date Range
-    if (!matchesDateRange(job.created_at, currentDateFilter)) return false;
+  const rawList = data || [];
+  updateBadges(rawList);
 
-    // Check Search Query
+  // 2. Filter list by selected status/type tab & search query
+  const filteredData = rawList.filter(job => {
+    const s = job.status || "pending";
+    if (currentFilter !== "all") {
+      if (["pending", "printing", "printed"].includes(currentFilter) && s !== currentFilter) return false;
+      if (["bw", "color"].includes(currentFilter) && job.print_type !== currentFilter) return false;
+    }
+
     if (searchQuery) {
       const name = (job.customer_name || "").toLowerCase();
       const file = (job.file_name || "").toLowerCase();
-      if (!name.includes(searchQuery) && !file.includes(searchQuery)) {
-        return false;
-      }
+      if (!name.includes(searchQuery) && !file.includes(searchQuery)) return false;
     }
 
     return true;
@@ -364,7 +384,7 @@ async function loadJobs() {
   document.getElementById("count").textContent = filteredData.length + " job(s)";
 
   if (!filteredData.length) {
-    c.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>' + (searchQuery || currentDateFilter !== 'all' ? 'No matching print jobs found.' : 'No print jobs yet.') + '</p></div>';
+    c.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><p>' + (searchQuery || currentDateFilter !== 'all' || currentFilter !== 'all' ? 'No matching print jobs found.' : 'No print jobs yet.') + '</p></div>';
     return;
   }
 
@@ -377,7 +397,7 @@ async function loadJobs() {
           pages = job.pages ? job.pages + " pg" : "",
           price = job.price ? "Rs." + job.price : "",
           cls = printed ? "is-printed" : printing ? "is-printing" : "is-pending",
-          icon = printed ? "✅" : printing ? "🖨️" : "📄",
+          icon = printed ? "✅" : printing ? "🖨️" : "⏳",
           pill = printed ? "printed" : printing ? "printing" : "pending",
           label = printed ? "✅ Printed" : printing ? "🖨️ Printing" : "⏳ Pending";
 
@@ -397,7 +417,10 @@ async function loadJobs() {
       </div>
       <div class="actions">
         <a class="btn view" href="${esc(job.file_url)}" target="_blank" rel="noopener">View</a>
-        ${!printed ? `<button class="btn print" onclick="printJob('${esc(job.id)}','${esc(job.file_url)}')">🖨️ Print</button><button class="btn done" onclick="markDone('${esc(job.id)}')">✔ Done</button>` : ""}
+        ${!printed ? `
+          <button class="btn print" onclick="printJob('${esc(job.id)}','${esc(job.file_url)}')">${printing ? "🖨️ Re-Print" : "🖨️ Print"}</button>
+          <button class="btn done" onclick="markDone('${esc(job.id)}')">✔ Done</button>
+        ` : ""}
       </div>
     </div>`;
   }).join("");
@@ -410,8 +433,25 @@ async function loadJobs() {
   }
 }
 
+function initRealtime() {
+  client
+    .channel("dashboard-changes")
+    .on("postgres_changes", { event: "*", schema: "public", table: "print_jobs" }, () => {
+      loadJobs();
+    })
+    .subscribe((status) => {
+      const syncEl = document.getElementById("syncStatus");
+      if (status === "SUBSCRIBED") {
+        syncEl.textContent = "Live connected (Realtime)";
+      } else {
+        syncEl.textContent = "Auto-refreshes every 10s";
+      }
+    });
+}
+
 loadJobs();
-setInterval(loadJobs, 5000);
+initRealtime();
+setInterval(loadJobs, 10000);
 </script>
 </body>
 </html>
